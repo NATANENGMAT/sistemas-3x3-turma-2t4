@@ -1466,6 +1466,8 @@
       return s === '24' || s.includes('24') || s.includes('2t4') || (s.includes('2') && s.includes('4'));
     }
 
+    const TURMA_2T4_ID = 'a64a2125-7950-441e-a26e-d05bd98827f0';
+
     async function fetchStudentsFromSupabase() {
       const statusEl = document.getElementById('loading-students-status');
       const selectEl = document.getElementById('select-student-name');
@@ -1475,30 +1477,33 @@
       let diagLogs = [];
 
       if (supabaseClient) {
-        // Query remota_alunos
+        // 1. Query remota_alunos specifically for 2º T4 turma_id
         try {
-          const res1 = await supabaseClient.from('remota_alunos').select('*');
-          if (res1.error) {
-            diagLogs.push(`remota_alunos: Erro [${res1.error.code || ''}] ${res1.error.message}`);
-          } else if (res1.data && res1.data.length > 0) {
-            diagLogs.push(`remota_alunos: ${res1.data.length} registros retornados`);
-            res1.data.forEach(item => {
-              let foundName = null;
-              for (const [k, v] of Object.entries(item)) {
-                if (typeof v === 'string' && (k.includes('nome') || k.includes('aluno') || k.includes('name')) && !k.includes('id') && !k.includes('turma')) {
-                  foundName = v.trim();
-                  break;
-                }
-              }
-              if (!foundName && typeof item.nome === 'string') foundName = item.nome.trim();
+          const { data, error } = await supabaseClient
+            .from('remota_alunos')
+            .select('nome, ordem_lista, ativo, aba_origem, turma_id')
+            .eq('turma_id', TURMA_2T4_ID)
+            .order('ordem_lista', { ascending: true });
 
-              if (foundName) {
-                const t = item.turma || item.turma_nome || '';
-                if (isTurma2T4(t)) {
-                  names.push(foundName);
-                }
+          if (!error && data && data.length > 0) {
+            diagLogs.push(`remota_alunos (turma_id): ${data.length} alunos`);
+            data.forEach(item => {
+              if (item.nome && typeof item.nome === 'string') {
+                names.push(item.nome.trim());
               }
             });
+          } else {
+            // Fallback query all
+            const resAll = await supabaseClient.from('remota_alunos').select('*');
+            if (resAll.data && resAll.data.length > 0) {
+              resAll.data.forEach(item => {
+                const origin = (item.aba_origem || item.turma || item.turma_nome || '').toString().toLowerCase();
+                if (item.turma_id === TURMA_2T4_ID || origin.includes('2º 4') || origin.includes('2º t4') || origin.includes('2-4')) {
+                  const n = item.nome || item.aluno_nome || item.nome_original;
+                  if (n) names.push(n.trim());
+                }
+              });
+            }
           }
         } catch(e) {
           diagLogs.push(`remota_alunos catch: ${e.message}`);
