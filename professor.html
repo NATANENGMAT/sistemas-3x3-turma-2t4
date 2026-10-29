@@ -303,6 +303,42 @@
       renderPendingGrid(pendingStudents, searchVal);
     }
 
+    // --- IMAGE REPAIR & FORMATTING HELPER ---
+    function prepareImageSrc(raw) {
+      if (!raw || typeof raw !== 'string') return '';
+      if (!raw.startsWith('data:image')) return raw;
+
+      const comma = raw.indexOf(',');
+      if (comma === -1) return raw;
+
+      const header = raw.slice(0, comma + 1);
+      let b64 = raw.slice(comma + 1).replace(/\s/g, '');
+
+      // Force valid Base64 length (multiple of 4)
+      const validLen = Math.floor(b64.length / 4) * 4;
+      b64 = b64.slice(0, validLen);
+
+      try {
+        const binary = atob(b64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len + 2);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        // Append JPEG EOF marker (\xFF\xD9) if missing
+        if (header.includes('jpeg') || header.includes('jpg')) {
+          if (len < 2 || bytes[len - 2] !== 0xFF || bytes[len - 1] !== 0xD9) {
+            bytes[len] = 0xFF;
+            bytes[len + 1] = 0xD9;
+          }
+        }
+        const blob = new Blob([bytes], { type: 'image/jpeg' });
+        return URL.createObjectURL(blob);
+      } catch (err) {
+        return header + b64;
+      }
+    }
+
     // --- RENDER DELIVERED CARDS ---
     function renderDeliveredList(filterVal) {
       const container = document.getElementById('list-delivered-cards');
@@ -327,6 +363,7 @@
 
         let questionsHtml = '';
         const qData = sub.questoes_respostas || {};
+        const photoUrlsForCard = {};
 
         for (let i = 1; i <= 6; i++) {
           const q = qData[`q${i}`];
@@ -334,7 +371,14 @@
             const vals = q.valores_digitados || {};
             const gab = q.gabarito_esperado || {};
             const isMatch = (parseInt(vals.x) === gab.x && parseInt(vals.y) === gab.y && parseInt(vals.z) === gab.z);
-            const hasPhoto = Boolean(q.foto_base64);
+            const rawPhoto = q.foto_base64;
+            const hasPhoto = Boolean(rawPhoto);
+
+            let fixedSrc = '';
+            if (hasPhoto) {
+              fixedSrc = prepareImageSrc(rawPhoto);
+              photoUrlsForCard[`q${i}`] = fixedSrc;
+            }
 
             questionsHtml += `
               <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-2.5">
@@ -355,8 +399,8 @@
                 ${
                   hasPhoto 
                     ? `
-                      <div class="relative group cursor-pointer overflow-hidden rounded-xl border border-slate-300 bg-slate-900 aspect-[4/3] flex items-center justify-center" onclick="openLightbox('${q.foto_base64}', '${sub.nome} - Questão ${i}', 'x=${vals.x}, y=${vals.y}, z=${vals.z}')">
-                        <img src="${q.foto_base64}" alt="Questão ${i}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200">
+                      <div class="relative group cursor-pointer overflow-hidden rounded-xl border border-slate-300 bg-slate-900 aspect-[4/3] flex items-center justify-center photo-trigger" data-sub-idx="${idx}" data-qid="${i}" data-aluno="${sub.nome}" data-info="x=${vals.x || '?'}, y=${vals.y || '?'}, z=${vals.z || '?'}">
+                        <img src="${fixedSrc}" alt="Questão ${i}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200" onerror="this.onerror=null; this.src='${rawPhoto.slice(0, Math.floor((rawPhoto.length - rawPhoto.indexOf(',')) / 4) * 4 + rawPhoto.indexOf(',') + 1)}';">
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
                           Ampliar Foto
@@ -411,6 +455,19 @@
             </div>
           </div>
         `;
+
+        // Wire click for lightbox
+        card.querySelectorAll('.photo-trigger').forEach(trigger => {
+          trigger.addEventListener('click', () => {
+            const qid = trigger.getAttribute('data-qid');
+            const aluno = trigger.getAttribute('data-aluno');
+            const info = trigger.getAttribute('data-info');
+            const src = photoUrlsForCard[`q${qid}`];
+            if (src) {
+              openLightbox(src, `${aluno} - Questão ${qid}`, info);
+            }
+          });
+        });
 
         container.appendChild(card);
       });
