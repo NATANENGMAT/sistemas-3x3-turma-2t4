@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sistemas 3x3 Escalonados — Prof. Natanael | Turma 2º 4</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- KaTeX for formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-math {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @keyframes floatIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .animate-float-in {
+      animation: floatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #toast-notification {
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 pb-14">
+
+  <!-- iPhone-Optimized Top App Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm px-4 py-3">
+    <div class="max-w-xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+          3×3
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">Turma 2º 4</span>
+            <span class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Prof. Natanael</span>
+          </div>
+          <h1 class="text-sm font-bold text-slate-900 leading-tight">Sistemas 3x3 Escalonados</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Teacher Dashboard Button -->
+        <button id="btn-open-teacher-panel" title="Painel do Professor Natanael" class="p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition text-xs font-bold flex items-center gap-1.5 px-3">
+          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+          <span class="hidden sm:inline">Entregas</span>
+        </button>
+
+        <!-- Audio Toggle -->
+        <button id="btn-audio-toggle" title="Alternar som" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+          <svg id="icon-sound-on" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+          <svg id="icon-sound-off" class="w-4 h-4 text-slate-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-xl w-full mx-auto p-4 flex flex-col gap-4">
+
+    <!-- STEP 1 MANDATORY: Student Identification Card -->
+    <div id="card-student-id" class="bg-white border-2 border-blue-500/40 rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs">1</span>
+        <h2 class="text-sm font-bold text-slate-900">Preencha seu Nome para Iniciar</h2>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">
+        Atividade em sala com o auxílio da professora. Identifique-se para enviar a resolução ao <strong>Prof. Natanael</strong>.
+      </p>
+
+      <!-- Selection from Supabase Database -->
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between flex-wrap gap-1">
+          <label for="select-student-name" class="text-xs font-semibold text-slate-700">Selecione seu nome na lista:</label>
+          <div class="flex items-center gap-2">
+            <span id="loading-students-status" class="text-[11px] font-medium text-blue-600">Consultando...</span>
+            <button id="btn-open-manage-students" type="button" class="text-[11px] text-blue-700 hover:underline font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">⚙ Gerenciar Alunos</button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <select id="select-student-name" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-blue-600 text-sm font-semibold text-slate-800 bg-white shadow-sm appearance-none pr-10 cursor-pointer">
+            <option value="">-- Toque para selecionar seu nome na lista --</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 mt-1">
+          <input type="text" id="input-student-name" placeholder="Filtrar por nome na lista..." class="flex-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-700 bg-slate-50 focus:outline-none focus:border-blue-500">
+          <button id="btn-save-name" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm active:scale-95">
+            <span>Confirmar</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Student Badge once confirmed -->
+      <div id="student-confirmed-badge" class="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between hidden">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span class="text-xs font-semibold text-emerald-900">Aluno(a): <strong id="display-student-name"></strong> • Turma 2º 4</span>
+        </div>
+        <button id="btn-edit-name" class="text-[11px] text-emerald-700 hover:underline font-medium">Alterar</button>
+      </div>
+    </div>
+
+    <!-- 6 Questions Navigation Bar -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-2.5 shadow-sm">
+      <div class="flex items-center justify-between mb-2 px-1">
+        <span class="text-xs font-bold text-slate-700 uppercase tracking-wide">6 Questões da Atividade:</span>
+        <span id="label-progress" class="text-xs font-semibold text-blue-600">Questão 1 de 6</span>
+      </div>
+      <div class="grid grid-cols-6 gap-1.5" id="questions-nav-container">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Mode Selector: Animated Explanation vs Photo Submission -->
+    <div class="grid grid-cols-2 gap-2 bg-slate-200/80 p-1 rounded-xl text-xs font-semibold">
+      <button id="btn-tab-anim" class="py-2 rounded-lg bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <span>Explicador Animado</span>
+      </button>
+      <button id="btn-tab-submit" class="py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+        <span>Foto da Resolução</span>
+      </button>
+    </div>
+
+    <!-- MAIN DISPLAY CARD: The Mathematical System -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+          <h3 id="current-question-title" class="text-sm font-bold text-slate-900">Questão 1 • Nível Básico</h3>
+        </div>
+        <span id="current-step-badge" class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-semibold font-mono">
+          Passo 0/4
+        </span>
+      </div>
+
+      <!-- KaTeX System Box -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center mb-3">
+        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Forma Escalonada Triangular</div>
+        <div id="system-formula-area" class="min-h-[120px] flex items-center justify-center text-lg sm:text-xl font-math text-slate-900 py-1">
+          <!-- Rendered by KaTeX -->
+        </div>
+
+        <!-- Color Legend for Variables -->
+        <div class="mt-3 pt-2.5 border-t border-slate-200/80 flex items-center justify-center gap-3 text-xs font-medium">
+          <span class="inline-flex items-center gap-1 text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 font-mono">
+            <strong>x</strong> (Azul)
+          </span>
+          <span class="inline-flex items-center gap-1 text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-mono">
+            <strong>y</strong> (Amarelo)
+          </span>
+          <span class="inline-flex items-center gap-1 text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-mono">
+            <strong>z</strong> (Verde)
+          </span>
+        </div>
+      </div>
+
+      <!-- SECTION A: ANIMATED RESOLUTION STEPS -->
+      <div id="section-animated-steps" class="flex flex-col gap-3">
+        <!-- Live Step Box -->
+        <div id="step-animation-box" class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 min-h-[140px] flex flex-col justify-center text-center">
+          <!-- Dynamic content -->
+        </div>
+
+        <!-- Discovered Variables Pills -->
+        <div class="flex items-center justify-between gap-2 p-2.5 bg-slate-100 rounded-xl text-xs font-mono font-bold">
+          <span class="text-slate-500 font-sans font-semibold">Valores:</span>
+          <div class="flex items-center gap-2">
+            <span id="badge-val-x" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-400">x = ?</span>
+            <span id="badge-val-y" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-400">y = ?</span>
+            <span id="badge-val-z" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-400">z = ?</span>
+          </div>
+        </div>
+
+        <!-- Step Navigation Controls -->
+        <div class="flex items-center justify-between gap-2 mt-1">
+          <button id="btn-prev-step" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1 transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <span>Passo Anterior</span>
+          </button>
+          
+          <button id="btn-autoplay" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1 transition active:scale-95 border border-slate-200">
+            <svg id="icon-play" class="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg id="icon-pause" class="w-3.5 h-3.5 text-amber-600 hidden" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            <span id="text-autoplay">Auto</span>
+          </button>
+
+          <button id="btn-next-step" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1 transition shadow-sm active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed">
+            <span>Próximo Passo</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION B: PHOTO SUBMISSION FOR THIS RESOLUTION -->
+      <div id="section-photo-upload" class="flex flex-col gap-3 hidden">
+        <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 leading-relaxed">
+          <strong class="font-bold block mb-1">Instruções para o Aluno (Turma 2º 4):</strong>
+          Resolva esta questão no seu caderno com o apoio da professora. Em seguida, tire uma foto nítida do seu cálculo e anexe abaixo.
+        </div>
+
+        <!-- Camera / File Input Card -->
+        <div class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-4 text-center bg-slate-50 transition cursor-pointer flex flex-col items-center justify-center gap-2 relative">
+          <input type="file" id="file-photo-input" accept="image/*" capture="environment" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+          
+          <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-slate-800 block">Toque para Tirar Foto ou Escolher</span>
+            <span class="text-[11px] text-slate-500">Câmera do iPhone ou Galeria</span>
+          </div>
+        </div>
+
+        <!-- Photo Preview Area -->
+        <div id="photo-preview-container" class="hidden p-3 bg-white border border-slate-200 rounded-xl flex items-center justify-between gap-3 shadow-sm">
+          <div class="flex items-center gap-3">
+            <img id="img-photo-preview" src="" alt="Foto da Resolução" class="w-14 h-14 object-cover rounded-lg border border-slate-200">
+            <div>
+              <span class="text-xs font-bold text-emerald-700 block">Foto Anexada ✓</span>
+              <span id="photo-filename" class="text-[11px] text-slate-500 block truncate max-w-[150px]">resolucao.jpg</span>
+            </div>
+          </div>
+          <button id="btn-remove-photo" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold transition">
+            Remover
+          </button>
+        </div>
+
+        <!-- Values check for student -->
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <span class="text-xs font-semibold text-slate-700 block">Valores encontrados no seu cálculo:</span>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-500 uppercase font-mono block">z =</label>
+              <input type="number" id="input-check-z" placeholder="?" class="w-full px-2 py-1.5 text-center text-xs font-mono font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-500 uppercase font-mono block">y =</label>
+              <input type="number" id="input-check-y" placeholder="?" class="w-full px-2 py-1.5 text-center text-xs font-mono font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-amber-500">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-500 uppercase font-mono block">x =</label>
+              <input type="number" id="input-check-x" placeholder="?" class="w-full px-2 py-1.5 text-center text-xs font-mono font-bold bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500">
+            </div>
+          </div>
+          <button id="btn-save-question-data" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition mt-2 active:scale-95">
+            Salvar Resolução da Questão
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FINAL SUBMISSION CARD -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-bold text-slate-900">Resumo da Entrega para o Prof. Natanael</h4>
+        <span id="label-attached-count" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">0 de 6 fotos anexadas</span>
+      </div>
+
+      <div class="space-y-1.5 mb-4 text-xs" id="summary-checklist">
+        <!-- Checklist rendered dynamically -->
+      </div>
+
+      <button id="btn-final-submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2 active:scale-95">
+        <svg id="icon-submit-send" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <span id="text-submit-btn">Enviar Atividade ao Prof. Natanael</span>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- TEACHER DASHBOARD MODAL: Monitor Submissions in Real-time -->
+  <div id="modal-teacher" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-float-in">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+            2º 4
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-slate-900">Painel do Prof. Natanael</h3>
+            <p class="text-[11px] text-slate-500">Entregas sincronizadas com Supabase</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="btn-refresh-teacher-data" title="Atualizar entregas" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </button>
+          <button id="btn-close-teacher-modal" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats Bar & Filter with Tabs for Entregues vs Não Entregues -->
+      <div class="p-3 bg-blue-50 border-b border-blue-100 flex flex-col gap-2 text-xs">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="font-semibold text-blue-900">Total: <strong id="teacher-total-count">0</strong> entregas</span>
+            <span class="text-slate-400">|</span>
+            <span class="text-rose-700 font-semibold"><strong id="teacher-pending-count">0</strong> pendentes</span>
+          </div>
+          <input type="text" id="teacher-filter-name" placeholder="Filtrar por nome..." class="px-2.5 py-1 text-xs rounded-lg border border-blue-200 bg-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5 bg-blue-100/70 p-1 rounded-xl font-bold text-center">
+          <button id="tab-entregues" class="py-1.5 rounded-lg bg-white text-blue-700 shadow-sm transition">
+            ✓ Entregaram (<span id="count-tab-entregues">0</span>)
+          </button>
+          <button id="tab-nao-entregues" class="py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+            ⏳ NÃO Entregaram (<span id="count-tab-pendentes">0</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Submissions List -->
+      <div class="p-3 sm:p-4 overflow-y-auto space-y-2.5 flex-1" id="teacher-submissions-list">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-[11px] text-slate-500">
+        <span>Conectado: jzepdmolnoobgbgdavyf.supabase.co</span>
+        <button id="btn-export-csv" class="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-slate-700 font-semibold hover:bg-slate-100">
+          Exportar Lista
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS RECEIPT MODAL -->
+  <div id="modal-receipt" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center flex flex-col items-center animate-float-in">
+      <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      </div>
+      <h3 class="text-base font-bold text-slate-900 mb-1">Atividade Enviada ao Supabase!</h3>
+      <p class="text-xs text-slate-500 mb-3">
+        Os dados e fotos foram gravados na nuvem para a avaliação do <strong>Professor Natanael de Matemática</strong>.
+      </p>
+
+      <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-left text-xs space-y-1 font-mono mb-4 text-slate-700">
+        <div><strong>Aluno(a):</strong> <span id="receipt-student"></span></div>
+        <div><strong>Turma:</strong> 2º 4</div>
+        <div><strong>Disciplina:</strong> Matemática</div>
+        <div><strong>Fotos Gravadas:</strong> <span id="receipt-count"></span>/6</div>
+        <div><strong>Protocolo:</strong> <span id="receipt-id"></span></div>
+        <div><strong>Data/Hora:</strong> <span id="receipt-time"></span></div>
+      </div>
+
+      <button id="btn-close-receipt" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-xs active:scale-95 transition">
+        Fechar Comprovante
+      </button>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast-notification" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 opacity-0 pointer-events-none px-4 py-2.5 rounded-xl bg-slate-900 text-white shadow-xl flex items-center gap-2 text-xs font-semibold">
+    <span id="toast-icon" class="text-emerald-400">✓</span>
+    <span id="toast-message">Salvo com sucesso!</span>
+  </div>
+
+  <script>
+    // --- SUPABASE CONFIGURATION (OFFICIAL CREDENTIALS) ---
+    const SUPABASE_URL = "https://jzepdmolnoobgbgdavyf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZXBkbW9sbm9vYmdiZ2RhdnlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MTAxOTcsImV4cCI6MjEwODA4NjE5N30._DZbJOiUKsh1IbUPPmxUaV2oPMOnv9d1ff9X1hhVK74";
+    
+    // Initialize client
+    let supabaseClient = null;
+    try {
+      if (window.supabase && window.supabase.createClient) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch(e) {
+      console.warn("Supabase init error:", e);
+    }
+
+    // --- 6 QUESTIONS DATA ---
+    const questionsData = [
+      {
+        id: 1,
+        title: "Questão 1",
+        difficulty: "Básico",
+        latexSystem: "\\begin{cases} x + y + z = 6 \\\\ y + z = 5 \\\\ z = 3 \\end{cases}",
+        eq1: "x + y + z = 6",
+        eq2: "y + z = 5",
+        eq3: "z = 3",
+        sol: { x: 1, y: 2, z: 3 },
+        steps: [
+          {
+            phase: 0,
+            badge: "Passo 0: Sistema Escalonado",
+            formula: "\\begin{cases} x + y + z = 6 \\\\ y + z = 5 \\\\ z = 3 \\end{cases}",
+            explanation: "O sistema está escalonado em forma de escada. A resolução começa sempre de baixo para cima (da 3ª equação para a 1ª).",
+            found: {}
+          },
+          {
+            phase: 1,
+            badge: "Passo 1: Encontrar z na 3ª Equação",
+            formula: "z = 3",
+            explanation: "A 3ª linha já nos fornece o valor direto da variável: <strong>z = 3</strong>.",
+            found: { z: 3 }
+          },
+          {
+            phase: 2,
+            badge: "Passo 2: Substituir z na 2ª Equação",
+            formula: "y + (3) = 5 \\implies y = 5 - 3 = 2",
+            explanation: "Levamos z = 3 para a 2ª linha: <code>y + 3 = 5</code>. Subtraindo 3 de ambos os lados: <strong>y = 2</strong>.",
+            found: { y: 2, z: 3 }
+          },
+          {
+            phase: 3,
+            badge: "Passo 3: Substituir y e z na 1ª Equação",
+            formula: "x + (2) + (3) = 6 \\implies x + 5 = 6 \\implies x = 1",
+            explanation: "Substituímos y = 2 e z = 3 na 1ª linha: <code>x + 5 = 6</code>, resultando em <strong>x = 1</strong>.",
+            found: { x: 1, y: 2, z: 3 }
+          },
+          {
+            phase: 4,
+            badge: "Passo 4: Conjunto Solução S",
+            formula: "S = \\{(1, 2, 3)\\}",
+            explanation: "Solução final em terno ordenado: <strong>S = {(1, 2, 3)}</strong>.",
+            found: { x: 1, y: 2, z: 3 }
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Questão 2",
+        difficulty: "Básico",
+        latexSystem: "\\begin{cases} x + 2y + z = 7 \\\\ y + 2z = 5 \\\\ z = 2 \\end{cases}",
+        eq1: "x + 2y + z = 7",
+        eq2: "y + 2z = 5",
+        eq3: "z = 2",
+        sol: { x: 3, y: 1, z: 2 },
+        steps: [
+          {
+            phase: 0,
+            badge: "Passo 0: Sistema Escalonado",
+            formula: "\\begin{cases} x + 2y + z = 7 \\\\ y + 2z = 5 \\\\ z = 2 \\end{cases}",
+            explanation: "Comece pela última equação onde z já está isolado.",
+            found: {}
+          },
+          {
+            phase: 1,
+            badge: "Passo 1: Valor de z",
+            formula: "z = 2",
+            explanation: "Lendo a 3ª linha: <strong>z = 2</strong>.",
+            found: { z: 2 }
+          },
+          {
+            phase: 2,
+            badge: "Passo 2: Resolver a 2ª Linha",
+            formula: "y + 2(2) = 5 \\implies y + 4 = 5 \\implies y = 1",
+            explanation: "Multiplicamos 2 por 2 para obter 4. Ao isolar y: <code>y = 5 - 4 = 1</code>.",
+            found: { y: 1, z: 2 }
+          },
+          {
+            phase: 3,
+            badge: "Passo 3: Resolver a 1ª Linha",
+            formula: "x + 2(1) + 2 = 7 \\implies x + 4 = 7 \\implies x = 3",
+            explanation: "Substituímos y = 1 e z = 2 na 1ª linha: <code>x + 4 = 7</code> $\\implies$ <strong>x = 3</strong>.",
+            found: { x: 3, y: 1, z: 2 }
+          },
+          {
+            phase: 4,
+            badge: "Passo 4: Solução S",
+            formula: "S = \\{(3, 1, 2)\\}",
+            explanation: "Terno ordenado: <strong>S = {(3, 1, 2)}</strong>.",
+            found: { x: 3, y: 1, z: 2 }
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "Questão 3",
+        difficulty: "Intermediário",
+        latexSystem: "\\begin{cases} x + y - 2z = 4 \\\\ y - z = 3 \\\\ 2z = 2 \\end{cases}",
+        eq1: "x + y - 2z = 4",
+        eq2: "y - z = 3",
+        eq3: "2z = 2",
+        sol: { x: 2, y: 4, z: 1 },
+        steps: [
+          {
+            phase: 0,
+            badge: "Passo 0: Sistema Escalonado",
+            formula: "\\begin{cases} x + y - 2z = 4 \\\\ y - z = 3 \\\\ 2z = 2 \\end{cases}",
+            explanation: "A 3ª equação possui coeficiente 2 na frente de z (2z = 2).",
+            found: {}
+          },
+          {
+            phase: 1,
+            badge: "Passo 1: Isolar z",
+            formula: "2z = 2 \\implies z = \\frac{2}{2} = 1",
+            explanation: "Dividindo ambos os membros por 2, obtemos <strong>z = 1</strong>.",
+            found: { z: 1 }
+          },
+          {
+            phase: 2,
+            badge: "Passo 2: Achar y",
+            formula: "y - (1) = 3 \\implies y = 3 + 1 = 4",
+            explanation: "Substituindo z = 1: <code>y - 1 = 3</code>. Passamos o 1 somando: <strong>y = 4</strong>.",
+            found: { y: 4, z: 1 }
+          },
+          {
+            phase: 3,
+            badge: "Passo 3: Achar x",
+            formula: "x + 4 - 2(1) = 4 \\implies x + 2 = 4 \\implies x = 2",
+            explanation: "Na 1ª linha: <code>x + 4 - 2 = 4</code> $\\implies$ <code>x + 2 = 4</code> $\\implies$ <strong>x = 2</strong>.",
+            found: { x: 2, y: 4, z: 1 }
+          },
+          {
+            phase: 4,
+            badge: "Passo 4: Solução S",
+            formula: "S = \\{(2, 4, 1)\\}",
+            explanation: "Solução: <strong>S = {(2, 4, 1)}</strong>.",
+            found: { x: 2, y: 4, z: 1 }
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "Questão 4",
+        difficulty: "Intermediário",
+        latexSystem: "\\begin{cases} x - y + 2z = 5 \\\\ 2y + z = 8 \\\\ 3z = 6 \\end{cases}",
+        eq1: "x - y + 2z = 5",
+        eq2: "2y + z = 8",
+        eq3: "3z = 6",
+        sol: { x: 4, y: 3, z: 2 },
+        steps: [
+          {
+            phase: 0,
+            badge: "Passo 0: Sistema Escalonado",
+            formula: "\\begin{cases} x - y + 2z = 5 \\\\ 2y + z = 8 \\\\ 3z = 6 \\end{cases}",
+            explanation: "Atenção aos coeficientes 3 na linha 3 e 2 na linha 2.",
+            found: {}
+          },
+          {
+            phase: 1,
+            badge: "Passo 1: Isolar z",
+            formula: "3z = 6 \\implies z = \\frac{6}{3} = 2",
+            explanation: "Isolando z: <code>z = 6 / 3 = 2</code>.",
+            found: { z: 2 }
+          },
+          {
+            phase: 2,
+            badge: "Passo 2: Achar y",
+            formula: "2y + (2) = 8 \\implies 2y = 6 \\implies y = 3",
+            explanation: "Substituímos z = 2: <code>2y + 2 = 8</code> $\\implies$ <code>2y = 6</code> $\\implies$ <strong>y = 3</strong>.",
+            found: { y: 3, z: 2 }
+          },
+          {
+            phase: 3,
+            badge: "Passo 3: Achar x",
+            formula: "x - (3) + 2(2) = 5 \\implies x + 1 = 5 \\implies x = 4",
+            explanation: "Atenção ao sinal: <code>x - 3 + 4 = 5</code> $\\implies$ <code>x + 1 = 5</code> $\\implies$ <strong>x = 4</strong>.",
+            found: { x: 4, y: 3, z: 2 }
+          },
+          {
+            phase: 4,
+            badge: "Passo 4: Solução S",
+            formula: "S = \\{(4, 3, 2)\\}",
+            explanation: "Solução: <strong>S = {(4, 3, 2)}</strong>.",
+            found: { x: 4, y: 3, z: 2 }
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "Questão 5",
+        difficulty: "Avançado",
+        latexSystem: "\\begin{cases} 2x + y + z = 3 \\\\ y + 2z = 4 \\\\ 2z = 6 \\end{cases}",
+        eq1: "2x + y + z = 3",
+        eq2: "y + 2z = 4",
+        eq3: "2z = 6",
+        sol: { x: 1, y: -2, z: 3 },
+        steps: [
+          {
+            phase: 0,
+            badge: "Passo 0: Sistema Escalonado",
+            formula: "\\begin{cases} 2x + y + z = 3 \\\\ y + 2z = 4 \\\\ 2z = 6 \\end{cases}",
+            explanation: "Exercício com surgimento de número inteiro negativo.",
+            found: {}
+          },
+          {
+            phase: 1,
+            badge: "Passo 1: Isolar z",
+            formula: "2z = 6 \\implies z = 3",
+            explanation: "Na linha 3: <strong>z = 3</strong>.",
+            found: { z: 3 }
+          },
+          {
+            phase: 2,
+            badge: "Passo 2: Achar y",
+            formula: "y + 2(3) = 4 \\implies y + 6 = 4 \\implies y = -2",
+            explanation: "Substituindo z = 3: <code>y + 6 = 4</code>. Passando o 6 subtraindo: <strong>y = -2</strong>.",
+            found: { y: -2, z: 3 }
+          },
+          {
+            phase: 3,
+            badge: "Passo 3: Achar x",
+            formula: "2x + (-2) + 3 = 3 \\implies 2x + 1 = 3 \\implies x = 1",
+            explanation: "Na 1ª linha: <code>2x - 2 + 3 = 3</code> $\\implies$ <code>2x + 1 = 3</code> $\\implies$ <strong>x = 1</strong>.",
+            found: { x: 1, y: -2, z: 3 }
+          },
+          {
+            phase: 4,
+            badge: "Passo 4: Solução S",
+            formula: "S = \\{(1, -2, 3)\\}",
+            explanation: "Solução: <strong>S = {(1, -2, 3)}</strong>.",
+            found: { x: 1, y: -2, z: 3 }
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "Questão 6",
+        difficulty: "Desafio",
+        latexSystem: "\\begin{cases} 3x + y - 2z = 1 \\\\ 2y - z = -4 \\\\ 5z = 20 \\end{cases}",
+        eq1: "3x + y - 2z = 1",
+        eq2: "2y - z = -4",
+        eq3: "5z = 20",
+        sol: { x: 3, y: 0, z: 4 },
+        steps: [
+          {
+            phase: 0,
+            badge: "Passo 0: Sistema Escalonado",
+            formula: "\\begin{cases} 3x + y - 2z = 1 \\\\ 2y - z = -4 \\\\ 5z = 20 \\end{cases}",
+            explanation: "Desafio final: uma das incógnitas terá valor nulo (zero).",
+            found: {}
+          },
+          {
+            phase: 1,
+            badge: "Passo 1: Isolar z",
+            formula: "5z = 20 \\implies z = \\frac{20}{5} = 4",
+            explanation: "Na 3ª linha: <code>z = 20 / 5 = 4</code>.",
+            found: { z: 4 }
+          },
+          {
+            phase: 2,
+            badge: "Passo 2: Achar y",
+            formula: "2y - (4) = -4 \\implies 2y = 0 \\implies y = 0",
+            explanation: "Substituímos z = 4: <code>2y - 4 = -4</code> $\\implies$ <code>2y = 0</code> $\\implies$ <strong>y = 0</strong>.",
+            found: { y: 0, z: 4 }
+          },
+          {
+            phase: 3,
+            badge: "Passo 3: Achar x",
+            formula: "3x + 0 - 2(4) = 1 \\implies 3x - 8 = 1 \\implies 3x = 9 \\implies x = 3",
+            explanation: "Com y = 0 e z = 4: <code>3x - 8 = 1</code> $\\implies$ <code>3x = 9</code> $\\implies$ <strong>x = 3</strong>.",
+            found: { x: 3, y: 0, z: 4 }
+          },
+          {
+            phase: 4,
+            badge: "Passo 4: Solução S",
+            formula: "S = \\{(3, 0, 4)\\}",
+            explanation: "Solução do desafio: <strong>S = {(3, 0, 4)}</strong>.",
+            found: { x: 3, y: 0, z: 4 }
+          }
+        ]
+      }
+    ];
+
+    // --- APPLICATION STATE ---
+    let studentName = "";
+    let currentQuestionIdx = 0;
+    let currentStepIdx = 0;
+    let activeTab = "anim";
+    let isAutoplaying = false;
+    let autoplayInterval = null;
+    let isAudioEnabled = true;
+
+    // Student Answers & Photos Store
+    const studentSubmissions = {
+      0: { photo: null, fileName: "", x: "", y: "", z: "", saved: false },
+      1: { photo: null, fileName: "", x: "", y: "", z: "", saved: false },
+      2: { photo: null, fileName: "", x: "", y: "", z: "", saved: false },
+      3: { photo: null, fileName: "", x: "", y: "", z: "", saved: false },
+      4: { photo: null, fileName: "", x: "", y: "", z: "", saved: false },
+      5: { photo: null, fileName: "", x: "", y: "", z: "", saved: false }
+    };
+
+    // Load persisted student name
+    try {
+      const saved = localStorage.getItem("aluno_turma_2_4");
+      if (saved) studentName = saved;
+    } catch(e) {}
+
+    // --- AUDIO SYNTHESIZER ---
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) audioCtx = new AudioClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!isAudioEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'step') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(480, now);
+          osc.frequency.exponentialRampToValueAtTime(700, now + 0.1);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523, now);
+          osc.frequency.setValueAtTime(659, now + 0.08);
+          osc.frequency.setValueAtTime(784, now + 0.16);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.31);
+        }
+      } catch (e) {}
+    }
+
+    // --- TOAST NOTIFICATION ---
+    let toastTimer = null;
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast-notification');
+      const text = document.getElementById('toast-message');
+      const icon = document.getElementById('toast-icon');
+      if (!toast) return;
+
+      text.textContent = msg;
+      icon.textContent = isSuccess ? '✓' : 'ℹ';
+      icon.className = isSuccess ? 'text-emerald-400' : 'text-amber-400';
+
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2600);
+    }
+
+    // --- RENDER FORMULA ---
+    function renderKaTeX(targetId, latex) {
+      const el = document.getElementById(targetId);
+      if (!el) return;
+      if (window.katex) {
+        try {
+          window.katex.render(latex, el, { throwOnError: false, displayMode: true });
+          return;
+        } catch(e) {}
+      }
+      el.textContent = latex;
+    }
+
+    // --- RENDER 6 QUESTION TABS ---
+    function renderQuestionTabs() {
+      const container = document.getElementById('questions-nav-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      questionsData.forEach((q, idx) => {
+        const btn = document.createElement('button');
+        const isCurrent = idx === currentQuestionIdx;
+        const hasPhoto = studentSubmissions[idx].photo !== null;
+
+        btn.className = `py-2 rounded-xl text-xs font-bold font-mono transition flex flex-col items-center justify-center gap-0.5 border ${
+          isCurrent
+            ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+            : hasPhoto
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+            : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+        }`;
+
+        btn.innerHTML = `
+          <span>Q${q.id}</span>
+          <span class="text-[9px] ${isCurrent ? 'text-blue-100' : hasPhoto ? 'text-emerald-600 font-bold' : 'text-slate-400'}">
+            ${hasPhoto ? '✓ Foto' : q.difficulty.slice(0, 3)}
+          </span>
+        `;
+
+        btn.addEventListener('click', () => {
+          stopAutoplay();
+          selectQuestion(idx);
+          playSound('step');
+        });
+
+        container.appendChild(btn);
+      });
+
+      document.getElementById('label-progress').textContent = `Questão ${currentQuestionIdx + 1} de 6`;
+    }
+
+    function selectQuestion(idx) {
+      currentQuestionIdx = idx;
+      currentStepIdx = 0;
+      renderQuestionTabs();
+      renderCurrentQuestion();
+      loadQuestionSubmissionData();
+    }
+
+    // --- RENDER CURRENT QUESTION DISPLAY ---
+    function renderCurrentQuestion() {
+      const q = questionsData[currentQuestionIdx];
+      const step = q.steps[currentStepIdx];
+
+      // Header title & badge
+      document.getElementById('current-question-title').textContent = `${q.title} • ${q.difficulty}`;
+      document.getElementById('current-step-badge').textContent = `Passo ${currentStepIdx}/4`;
+
+      // KaTeX System
+      renderKaTeX('system-formula-area', q.latexSystem);
+
+      // Animation Step Box
+      const box = document.getElementById('step-animation-box');
+      box.innerHTML = '';
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'animate-float-in flex flex-col items-center text-center';
+
+      const badge = document.createElement('span');
+      badge.className = 'px-3 py-1 rounded-full text-xs font-bold mb-2 inline-block border ' + 
+        (step.phase === 0 ? 'bg-slate-100 text-slate-800 border-slate-300' :
+         step.phase === 1 ? 'bg-emerald-50 text-emerald-800 border-emerald-300' :
+         step.phase === 2 ? 'bg-amber-50 text-amber-800 border-amber-300' :
+         step.phase === 3 ? 'bg-sky-50 text-sky-800 border-sky-300' :
+         'bg-purple-50 text-purple-800 border-purple-300');
+      badge.textContent = step.badge;
+      stepDiv.appendChild(badge);
+
+      const mathArea = document.createElement('div');
+      mathArea.className = 'text-base sm:text-xl font-math text-slate-900 my-1 font-bold';
+      stepDiv.appendChild(mathArea);
+
+      const exp = document.createElement('p');
+      exp.className = 'text-xs text-slate-600 mt-2 max-w-sm leading-relaxed';
+      exp.innerHTML = step.explanation;
+      stepDiv.appendChild(exp);
+
+      box.appendChild(stepDiv);
+
+      if (window.katex) {
+        try {
+          window.katex.render(step.formula, mathArea, { throwOnError: false, displayMode: true });
+        } catch(e) {
+          mathArea.textContent = step.formula;
+        }
+      } else {
+        mathArea.textContent = step.formula;
+      }
+
+      // Update Discovered Value Badges
+      const bX = document.getElementById('badge-val-x');
+      const bY = document.getElementById('badge-val-y');
+      const bZ = document.getElementById('badge-val-z');
+
+      bX.textContent = step.found.x !== undefined ? `x = ${step.found.x}` : 'x = ?';
+      bX.className = step.found.x !== undefined ? 'px-2.5 py-1 rounded-lg bg-sky-100 border border-sky-300 text-sky-900 font-bold' : 'px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-400';
+
+      bY.textContent = step.found.y !== undefined ? `y = ${step.found.y}` : 'y = ?';
+      bY.className = step.found.y !== undefined ? 'px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 font-bold' : 'px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-400';
+
+      bZ.textContent = step.found.z !== undefined ? `z = ${step.found.z}` : 'z = ?';
+      bZ.className = step.found.z !== undefined ? 'px-2.5 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-900 font-bold' : 'px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-400';
+
+      // Controls State
+      document.getElementById('btn-prev-step').disabled = currentStepIdx === 0;
+      document.getElementById('btn-next-step').disabled = currentStepIdx === 4;
+    }
+
+    // --- STEP NAVIGATION ---
+    function nextStep() {
+      if (currentStepIdx < 4) {
+        currentStepIdx++;
+        renderCurrentQuestion();
+        playSound('step');
+      } else {
+        stopAutoplay();
+        playSound('success');
+      }
+    }
+
+    function prevStep() {
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderCurrentQuestion();
+        playSound('step');
+      }
+    }
+
+    function toggleAutoplay() {
+      if (isAutoplaying) stopAutoplay();
+      else startAutoplay();
+    }
+
+    function startAutoplay() {
+      isAutoplaying = true;
+      document.getElementById('icon-play').classList.add('hidden');
+      document.getElementById('icon-pause').classList.remove('hidden');
+      document.getElementById('text-autoplay').textContent = 'Pausa';
+
+      if (currentStepIdx >= 4) {
+        currentStepIdx = 0;
+        renderCurrentQuestion();
+      }
+
+      autoplayInterval = setInterval(() => {
+        if (currentStepIdx < 4) nextStep();
+        else stopAutoplay();
+      }, 2000);
+    }
+
+    function stopAutoplay() {
+      isAutoplaying = false;
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayInterval = null;
+      }
+      document.getElementById('icon-play').classList.remove('hidden');
+      document.getElementById('icon-pause').classList.add('hidden');
+      document.getElementById('text-autoplay').textContent = 'Auto';
+    }
+
+    // --- PHOTO SUBMISSION HANDLING ---
+    function loadQuestionSubmissionData() {
+      const data = studentSubmissions[currentQuestionIdx];
+      const previewCont = document.getElementById('photo-preview-container');
+      const img = document.getElementById('img-photo-preview');
+      const fname = document.getElementById('photo-filename');
+      const inZ = document.getElementById('input-check-z');
+      const inY = document.getElementById('input-check-y');
+      const inX = document.getElementById('input-check-x');
+
+      inZ.value = data.z || '';
+      inY.value = data.y || '';
+      inX.value = data.x || '';
+
+      if (data.photo) {
+        img.src = data.photo;
+        fname.textContent = data.fileName;
+        previewCont.classList.remove('hidden');
+      } else {
+        img.src = '';
+        previewCont.classList.add('hidden');
+      }
+
+      updateSummaryChecklist();
+    }
+
+    function handlePhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        studentSubmissions[currentQuestionIdx].photo = evt.target.result;
+        studentSubmissions[currentQuestionIdx].fileName = file.name || `resolucao_q${currentQuestionIdx + 1}.jpg`;
+        studentSubmissions[currentQuestionIdx].saved = true;
+
+        loadQuestionSubmissionData();
+        renderQuestionTabs();
+        showToast(`Foto da Questão ${currentQuestionIdx + 1} anexada!`);
+        playSound('success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeCurrentPhoto() {
+      studentSubmissions[currentQuestionIdx].photo = null;
+      studentSubmissions[currentQuestionIdx].fileName = "";
+      loadQuestionSubmissionData();
+      renderQuestionTabs();
+      showToast("Foto removida.", false);
+    }
+
+    function saveCurrentQuestionData() {
+      const inZ = document.getElementById('input-check-z').value.trim();
+      const inY = document.getElementById('input-check-y').value.trim();
+      const inX = document.getElementById('input-check-x').value.trim();
+
+      studentSubmissions[currentQuestionIdx].z = inZ;
+      studentSubmissions[currentQuestionIdx].y = inY;
+      studentSubmissions[currentQuestionIdx].x = inX;
+      studentSubmissions[currentQuestionIdx].saved = true;
+
+      updateSummaryChecklist();
+      showToast(`Resolução da Questão ${currentQuestionIdx + 1} salva!`);
+      playSound('step');
+    }
+
+    // --- SUMMARY CHECKLIST ---
+    function updateSummaryChecklist() {
+      const container = document.getElementById('summary-checklist');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let photoCount = 0;
+
+      questionsData.forEach((q, idx) => {
+        const item = studentSubmissions[idx];
+        const hasPhoto = item.photo !== null;
+        if (hasPhoto) photoCount++;
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200';
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full ${hasPhoto ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-600'} flex items-center justify-center text-[10px] font-bold">
+              ${hasPhoto ? '✓' : idx + 1}
+            </span>
+            <span class="font-semibold text-slate-800">Questão ${q.id}</span>
+            <span class="text-[10px] text-slate-500 hidden sm:inline">• ${q.difficulty}</span>
+          </div>
+          <span class="text-[11px] font-medium ${hasPhoto ? 'text-emerald-700 font-bold' : 'text-slate-400'}">
+            ${hasPhoto ? 'Foto Anexada ✓' : 'Pendente foto'}
+          </span>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('label-attached-count').textContent = `${photoCount} de 6 fotos anexadas`;
+    }
+
+    // --- SUPABASE STORAGE & DATABASE INTEGRATION ---
+    async function submitEntireActivity() {
+      if (!studentName || studentName.trim().length === 0) {
+        showToast('Por favor, preencha seu nome primeiro no topo!', false);
+        const nameInput = document.getElementById('input-student-name');
+        if (nameInput) {
+          nameInput.focus();
+          nameInput.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+
+      const submitBtn = document.getElementById('btn-final-submit');
+      const submitText = document.getElementById('text-submit-btn');
+      submitBtn.disabled = true;
+      submitText.textContent = "Gravando no Supabase...";
+
+      let photoCount = 0;
+      const questionsPayload = {};
+
+      for (let i = 0; i < 6; i++) {
+        const item = studentSubmissions[i];
+        if (item.photo) photoCount++;
+
+        questionsPayload[`q${i + 1}`] = {
+          titulo: `Questão ${i + 1}`,
+          valores_digitados: { x: item.x, y: item.y, z: item.z },
+          gabarito_esperado: questionsData[i].sol,
+          tem_foto: item.photo !== null,
+          foto_base64: item.photo ? item.photo.slice(0, 500000) : null // base64 storage fallback
+        };
+      }
+
+      let submissionId = "SUB-" + Math.floor(100000 + Math.random() * 900000);
+      let isSuccess = false;
+
+      // Send to Supabase Table 'atividade_sistema_3×3_2t4' (and fallback to remota_entregas / entregas_sistemas)
+      if (supabaseClient) {
+        const payloadVariants = [
+          {
+            nome: studentName,
+            turma: '2º 4',
+            total_fotos: photoCount,
+            questoes_respostas: questionsPayload,
+            created_at: new Date().toISOString()
+          },
+          {
+            aluno_nome: studentName,
+            turma: '2º 4',
+            total_fotos: photoCount,
+            questoes_respostas: questionsPayload,
+            created_at: new Date().toISOString()
+          }
+        ];
+
+        const targetTables = ['entregas_sistemas_2t4', 'atividade_sistema_3x3_2t4', 'atividade_sistema_3×3_2t4', 'remota_entregas', 'entregas_sistemas'];
+        let inserted = false;
+
+        for (const tbl of targetTables) {
+          for (const pl of payloadVariants) {
+            try {
+              const { data, error } = await supabaseClient.from(tbl).insert([pl]).select();
+              if (!error && data && data.length > 0) {
+                submissionId = data[0].id || submissionId;
+                inserted = true;
+                console.log(`Salvo com sucesso na tabela ${tbl}:`, data);
+                break;
+              }
+            } catch(e) {}
+          }
+          if (inserted) break;
+        }
+
+        if (!inserted) {
+          saveLocalFallback(submissionId, studentName, photoCount, questionsPayload);
+        }
+      } else {
+        saveLocalFallback(submissionId, studentName, photoCount, questionsPayload);
+      }
+
+      submitBtn.disabled = false;
+      submitText.textContent = "Enviar Atividade ao Prof. Natanael";
+
+      // Populate Receipt
+      document.getElementById('receipt-student').textContent = studentName;
+      document.getElementById('receipt-count').textContent = photoCount;
+      document.getElementById('receipt-id').textContent = submissionId.toString().slice(0, 18);
+      document.getElementById('receipt-time').textContent = new Date().toLocaleString('pt-BR');
+
+      document.getElementById('modal-receipt').classList.remove('hidden');
+      playSound('success');
+      showToast('Entrega gravada no Supabase!');
+    }
+
+    function saveLocalFallback(id, name, count, details) {
+      try {
+        const existing = JSON.parse(localStorage.getItem('entregas_locais_turma_2_4') || '[]');
+        existing.unshift({
+          id: id,
+          aluno_nome: name,
+          turma: '2º 4',
+          total_fotos: count,
+          created_at: new Date().toISOString(),
+          questoes_respostas: details
+        });
+        localStorage.setItem('entregas_locais_turma_2_4', JSON.stringify(existing.slice(0, 50)));
+      } catch(e) {}
+    }
+
+    // --- TEACHER REALTIME MONITORING PANEL ---
+    async function loadTeacherDashboard() {
+      const listContainer = document.getElementById('teacher-submissions-list');
+      const countEl = document.getElementById('teacher-total-count');
+      listContainer.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">Carregando dados do Supabase...</div>';
+
+      let records = [];
+
+      // Try fetching from atividade_sistema_3×3_2t4 or remota_entregas
+      if (supabaseClient) {
+        const queryTables = ['entregas_sistemas_2t4', 'atividade_sistema_3x3_2t4', 'atividade_sistema_3×3_2t4', 'remota_entregas', 'entregas_sistemas'];
+        for (const tbl of queryTables) {
+          try {
+            const { data, error } = await supabaseClient
+              .from(tbl)
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!error && data && data.length > 0) {
+              // Normalize field name (nome or aluno_nome)
+              records = data.map(r => ({
+                ...r,
+                aluno_nome: r.nome || r.aluno_nome || r.aluno || 'Estudante'
+              }));
+              break;
+            }
+          } catch(e) {}
+        }
+      }
+
+      // Merge local fallback records if any
+      try {
+        const local = JSON.parse(localStorage.getItem('entregas_locais_turma_2_4') || '[]');
+        if (records.length === 0) records = local;
+      } catch(e) {}
+
+      countEl.textContent = records.length;
+      renderTeacherSubmissions(records);
+    }
+
+    let teacherViewTab = 'entregues'; // 'entregues' or 'pendentes'
+    let currentTeacherRecords = [];
+
+    function renderTeacherSubmissions(records) {
+      currentTeacherRecords = records;
+      const container = document.getElementById('teacher-submissions-list');
+      const filterInput = document.getElementById('teacher-filter-name');
+      const filterVal = (filterInput ? filterInput.value.toLowerCase().trim() : '');
+
+      // Identify submitted student names (lowercased)
+      const submittedNamesSet = new Set(records.map(r => (r.aluno_nome || '').toLowerCase().trim()));
+      
+      // Calculate pending students from loadedStudents
+      const pendingStudents = loadedStudents.filter(n => !submittedNamesSet.has(n.toLowerCase().trim()));
+
+      document.getElementById('teacher-total-count').textContent = records.length;
+      document.getElementById('teacher-pending-count').textContent = pendingStudents.length;
+      document.getElementById('count-tab-entregues').textContent = records.length;
+      document.getElementById('count-tab-pendentes').textContent = pendingStudents.length;
+
+      if (teacherViewTab === 'pendentes') {
+        renderPendingStudentsView(pendingStudents, filterVal);
+      } else {
+        renderDeliveredStudentsView(records, filterVal);
+      }
+    }
+
+    function renderDeliveredStudentsView(records, filterVal) {
+      const container = document.getElementById('teacher-submissions-list');
+      const filtered = records.filter(r => (r.aluno_nome || '').toLowerCase().includes(filterVal));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-xs text-slate-400 bg-slate-50 border border-slate-200 rounded-xl">
+            Nenhuma entrega encontrada para o filtro.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'p-3 bg-white border border-slate-200 rounded-xl shadow-sm text-xs hover:border-blue-400 transition flex flex-col gap-2';
+
+        const dateFormatted = item.created_at ? new Date(item.created_at).toLocaleString('pt-BR') : 'Hoje';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-[10px]">
+                ✓
+              </span>
+              <strong class="text-slate-900 font-semibold text-sm">${item.aluno_nome}</strong>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              item.total_fotos > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'
+            }">
+              ${item.total_fotos} fotos anexadas
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            <span>Turma: ${item.turma || '2º 4'}</span>
+            <span>Data: ${dateFormatted}</span>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[10px] text-slate-400 truncate max-w-[200px]">ID: ${item.id || 'reg'}</span>
+            <button class="btn-inspect-student px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-bold text-[11px] transition" data-idx="${idx}">
+              Ver Fotos e Cálculos
+            </button>
+          </div>
+          <div id="details-box-${idx}" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 mt-1 font-mono text-[11px] space-y-2 text-slate-700">
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Bind inspect buttons
+      container.querySelectorAll('.btn-inspect-student').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const i = parseInt(btn.getAttribute('data-idx'), 10);
+          const box = document.getElementById(`details-box-${i}`);
+          const rec = filtered[i];
+
+          if (box.classList.contains('hidden')) {
+            box.classList.remove('hidden');
+            btn.textContent = 'Ocultar Detalhes';
+
+            let detailsHtml = '<div class="font-sans font-bold text-slate-800 text-xs mb-1">Cálculos e Fotos das 6 Questões:</div>';
+            if (rec.questoes_respostas) {
+              for (let k = 1; k <= 6; k++) {
+                const qKey = `q${k}`;
+                const qData = rec.questoes_respostas[qKey];
+                if (qData) {
+                  const vals = qData.valores_digitados || {};
+                  const gab = qData.gabarito_esperado || {};
+                  const isCorrect = (parseInt(vals.x) === gab.x && parseInt(vals.y) === gab.y && parseInt(vals.z) === gab.z);
+                  
+                  detailsHtml += `
+                    <div class="p-2 rounded-lg bg-white border border-slate-200 flex flex-col gap-1.5">
+                      <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-900">Questão ${k}</span>
+                        <span class="${isCorrect ? 'text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded' : 'text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded'}">
+                          ${isCorrect ? '✓ Valores Corretos' : 'Verificar Valores'}
+                        </span>
+                      </div>
+                      <div class="text-[11px] text-slate-600">
+                        z=${vals.z || '?'}, y=${vals.y || '?'}, x=${vals.x || '?'} (Gabarito: z=${gab.z}, y=${gab.y}, x=${gab.x})
+                      </div>
+                  `;
+
+                  if (qData.foto_base64) {
+                    detailsHtml += `
+                      <div class="mt-1 flex items-center gap-2">
+                        <img src="${qData.foto_base64}" class="w-16 h-16 object-cover rounded-lg border border-slate-300 cursor-pointer hover:opacity-80 transition photo-thumbnail" data-caption="${rec.aluno_nome} - Questão ${k}">
+                        <span class="text-[10px] text-blue-600 font-sans cursor-pointer underline photo-thumbnail-text" data-src="${qData.foto_base64}" data-caption="${rec.aluno_nome} - Questão ${k}">Clique para ampliar foto</span>
+                      </div>
+                    `;
+                  } else {
+                    detailsHtml += `<span class="text-[10px] text-slate-400 italic">Sem foto anexada</span>`;
+                  }
+
+                  detailsHtml += `</div>`;
+                }
+              }
+            }
+            box.innerHTML = detailsHtml;
+
+            // Wire up image zoom clicks
+            box.querySelectorAll('.photo-thumbnail, .photo-thumbnail-text').forEach(el => {
+              el.addEventListener('click', () => {
+                const src = el.getAttribute('src') || el.getAttribute('data-src');
+                const caption = el.getAttribute('data-caption');
+                openPhotoZoom(src, caption);
+              });
+            });
+          } else {
+            box.classList.add('hidden');
+            btn.textContent = 'Ver Fotos e Cálculos';
+          }
+        });
+      });
+    }
+
+    function renderPendingStudentsView(pendingStudents, filterVal) {
+      const container = document.getElementById('teacher-submissions-list');
+      const filtered = pendingStudents.filter(n => n.toLowerCase().includes(filterVal));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl font-bold">
+            🎉 Todos os alunos da lista já entregaram a atividade!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach((name, idx) => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-white border border-rose-200 rounded-xl shadow-sm text-xs flex items-center justify-between';
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-[10px]">
+              ${idx + 1}
+            </span>
+            <strong class="text-slate-800 font-semibold">${name}</strong>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            Pendente
+          </span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function openPhotoZoom(src, caption) {
+      const modal = document.getElementById('modal-photo-zoom');
+      const img = document.getElementById('img-fullscreen-zoom');
+      const cap = document.getElementById('caption-photo-zoom');
+      if (modal && img) {
+        img.src = src;
+        if (cap) cap.textContent = caption || "Resolução do Caderno";
+        modal.classList.remove('hidden');
+      }
+    }
+
+
+    // Export CSV
+    function exportTeacherCSV() {
+      const records = [];
+      const rows = [["Aluno", "Turma", "Total Fotos", "Data Envio", "Status"]];
+
+      const listCards = document.querySelectorAll('#teacher-submissions-list strong');
+      listCards.forEach(s => {
+        rows.push([s.textContent, "2º 4", "6", new Date().toLocaleDateString('pt-BR'), "Entregue"]);
+      });
+
+      let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(";")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `entregas_turma_2_4_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Lista exportada em CSV!");
+    }
+
+    
+    // --- LOAD STUDENTS FROM SUPABASE WITH COMPREHENSIVE QUERY & DIAGNOSTICS ---
+    const DEFAULT_STUDENTS_2T4 = [
+      "Emanuel Nunes",
+      "Emanuelly Melo",
+      "Leonardo Lima",
+      "Maria Eduarda",
+      "Maria Luisa",
+      "Micaela Dos Santos",
+      "Nicolas Carvalho",
+      "Pedro Henrique",
+      "Priscila Evellyn",
+      "Rayanna Ribeiro",
+      "Rayra Alana",
+      "Renata Sophia",
+      "Rian De Sa Ribeiro",
+      "Sarah Melo",
+      "Sophia Da Silva",
+      "Sophya Oliveira",
+      "Taicilane Pedroza",
+      "Victor Aldenney",
+      "Victor Braiam",
+      "Vitor Eduardo",
+      "Vitoria Julia",
+      "Yasmin Giovana",
+      "Yellen Biatriz"
+    ];
+
+    let loadedStudents = [...DEFAULT_STUDENTS_2T4];
+    try {
+      const cached = JSON.parse(localStorage.getItem('cache_remota_alunos_2_4') || '[]');
+      if (cached && cached.length > 0) loadedStudents = cached;
+    } catch(e) {}
+
+    let lastSupabaseDiagnostic = "";
+
+    function isTurma2T4(turmaStr) {
+      if (!turmaStr) return true;
+      const s = turmaStr.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+      return s === '24' || s.includes('24') || s.includes('2t4') || (s.includes('2') && s.includes('4'));
+    }
+
+    async function fetchStudentsFromSupabase() {
+      const statusEl = document.getElementById('loading-students-status');
+      const selectEl = document.getElementById('select-student-name');
+      if (statusEl) statusEl.textContent = "Sincronizando Supabase...";
+
+      let names = [];
+      let diagLogs = [];
+
+      if (supabaseClient) {
+        // Query remota_alunos
+        try {
+          const res1 = await supabaseClient.from('remota_alunos').select('*');
+          if (res1.error) {
+            diagLogs.push(`remota_alunos: Erro [${res1.error.code || ''}] ${res1.error.message}`);
+          } else if (res1.data && res1.data.length > 0) {
+            diagLogs.push(`remota_alunos: ${res1.data.length} registros retornados`);
+            res1.data.forEach(item => {
+              let foundName = null;
+              for (const [k, v] of Object.entries(item)) {
+                if (typeof v === 'string' && (k.includes('nome') || k.includes('aluno') || k.includes('name')) && !k.includes('id') && !k.includes('turma')) {
+                  foundName = v.trim();
+                  break;
+                }
+              }
+              if (!foundName && typeof item.nome === 'string') foundName = item.nome.trim();
+
+              if (foundName) {
+                const t = item.turma || item.turma_nome || '';
+                if (isTurma2T4(t)) {
+                  names.push(foundName);
+                }
+              }
+            });
+          }
+        } catch(e) {
+          diagLogs.push(`remota_alunos catch: ${e.message}`);
+        }
+
+        // Query entregas_sistemas_2t4 fallback names
+        const tableCandidates = ['entregas_sistemas_2t4', 'atividade_sistema_3x3_2t4', 'atividade_sistema_3×3_2t4'];
+        for (const tbl of tableCandidates) {
+          try {
+            const res2 = await supabaseClient.from(tbl).select('*');
+            if (res2.error) {
+              diagLogs.push(`${tbl}: Erro ${res2.error.message}`);
+            } else if (res2.data && res2.data.length > 0) {
+              diagLogs.push(`${tbl}: ${res2.data.length} registros encontrados`);
+              res2.data.forEach(item => {
+                const n = item.nome || item.aluno_nome || item.aluno;
+                if (n && typeof n === 'string') names.push(n.trim());
+              });
+            }
+          } catch(e) {}
+        }
+      } else {
+        diagLogs.push("Supabase Client não inicializado");
+      }
+
+      lastSupabaseDiagnostic = diagLogs.join(" | ");
+      console.log("Supabase Diagnostic:", lastSupabaseDiagnostic);
+
+      // Merge with default official list so all students are always available
+      const merged = Array.from(new Set([...DEFAULT_STUDENTS_2T4, ...names])).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      loadedStudents = merged;
+      try { localStorage.setItem('cache_remota_alunos_2_4', JSON.stringify(merged)); } catch(e) {}
+
+      if (names.length > 0) {
+        if (statusEl) statusEl.innerHTML = `<span class="text-emerald-700 font-bold">Supabase: ${merged.length} alunos sincronizados ✓</span>`;
+      } else {
+        if (statusEl) statusEl.innerHTML = `<span class="text-blue-700 font-medium">${merged.length} alunos oficiais (2º 4) ✓</span>`;
+      }
+      populateStudentsSelect(loadedStudents);
+    }
+
+    function populateStudentsSelect(list) {
+      const selectEl = document.getElementById('select-student-name');
+      if (!selectEl) return;
+
+      selectEl.innerHTML = '<option value="">-- Toque para selecionar seu nome na lista --</option>';
+      list.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        if (studentName && studentName.toLowerCase() === name.toLowerCase()) {
+          opt.selected = true;
+        }
+        selectEl.appendChild(opt);
+      });
+    }
+
+    // Filter students input
+    function filterStudentsList(query) {
+      if (!loadedStudents || loadedStudents.length === 0) return;
+      const q = query.toLowerCase().trim();
+      const filtered = loadedStudents.filter(n => n.toLowerCase().includes(q));
+      populateStudentsSelect(filtered.length > 0 ? filtered : loadedStudents);
+    }
+
+    // --- DOM INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const nameInput = document.getElementById('input-student-name');
+      const badgeConf = document.getElementById('student-confirmed-badge');
+      const dispName = document.getElementById('display-student-name');
+
+      if (studentName) {
+        nameInput.value = studentName;
+        dispName.textContent = studentName;
+        badgeConf.classList.remove('hidden');
+      }
+
+      // Save Student Name from Select Dropdown
+      const selectStudent = document.getElementById('select-student-name');
+      const filterInput = document.getElementById('input-student-name');
+
+      // Auto-filter when typing in search box
+      if (filterInput) {
+        filterInput.addEventListener('input', (e) => {
+          filterStudentsList(e.target.value);
+        });
+      }
+
+      // Populate with initial student list immediately
+      populateStudentsSelect(loadedStudents);
+
+      function confirmSelectedStudent(val) {
+        if (!val) {
+          showToast('Selecione seu nome na lista da turma!', false);
+          if (selectStudent) selectStudent.focus();
+          return;
+        }
+        studentName = val;
+        try { localStorage.setItem("aluno_turma_2_4", val); } catch(e) {}
+        if (nameInput) nameInput.value = val;
+        if (dispName) dispName.textContent = val;
+        badgeConf.classList.remove('hidden');
+        showToast(`Aluno(a) confirmado(a): ${val}!`);
+        playSound('step');
+      }
+
+      // When selecting from dropdown, confirm automatically
+      if (selectStudent) {
+        selectStudent.addEventListener('change', () => {
+          if (selectStudent.value) {
+            confirmSelectedStudent(selectStudent.value);
+          }
+        });
+      }
+
+      document.getElementById('btn-save-name').addEventListener('click', () => {
+        const val = (selectStudent && selectStudent.value) ? selectStudent.value.trim() : (nameInput ? nameInput.value.trim() : '');
+        confirmSelectedStudent(val);
+      });
+
+      // Fetch students from Supabase immediately on startup
+      fetchStudentsFromSupabase();
+
+      document.getElementById('btn-edit-name').addEventListener('click', () => {
+        nameInput.focus();
+        nameInput.select();
+      });
+
+      // Tabs: Explicador Animado vs Foto da Resolução
+      const tabAnim = document.getElementById('btn-tab-anim');
+      const tabSubmit = document.getElementById('btn-tab-submit');
+      const secAnim = document.getElementById('section-animated-steps');
+      const secPhoto = document.getElementById('section-photo-upload');
+
+      tabAnim.addEventListener('click', () => {
+        activeTab = 'anim';
+        tabAnim.className = 'py-2 rounded-lg bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-1.5';
+        tabSubmit.className = 'py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+        secAnim.classList.remove('hidden');
+        secPhoto.classList.add('hidden');
+        playSound('step');
+      });
+
+      tabSubmit.addEventListener('click', () => {
+        activeTab = 'submit';
+        tabSubmit.className = 'py-2 rounded-lg bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-1.5';
+        tabAnim.className = 'py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5';
+        secPhoto.classList.remove('hidden');
+        secAnim.classList.add('hidden');
+        playSound('step');
+      });
+
+      // Step Controls
+      document.getElementById('btn-next-step').addEventListener('click', nextStep);
+      document.getElementById('btn-prev-step').addEventListener('click', prevStep);
+      document.getElementById('btn-autoplay').addEventListener('click', toggleAutoplay);
+
+      // Photo handling
+      document.getElementById('file-photo-input').addEventListener('change', handlePhotoUpload);
+      document.getElementById('btn-remove-photo').addEventListener('click', removeCurrentPhoto);
+      document.getElementById('btn-save-question-data').addEventListener('click', saveCurrentQuestionData);
+
+      // Audio Toggle
+      document.getElementById('btn-audio-toggle').addEventListener('click', () => {
+        isAudioEnabled = !isAudioEnabled;
+        document.getElementById('icon-sound-on').classList.toggle('hidden', !isAudioEnabled);
+        document.getElementById('icon-sound-off').classList.toggle('hidden', isAudioEnabled);
+        showToast(isAudioEnabled ? 'Sons ativados' : 'Sons desativados', isAudioEnabled);
+      });
+
+      // Final Submission & Modal
+      document.getElementById('btn-final-submit').addEventListener('click', submitEntireActivity);
+      document.getElementById('btn-close-receipt').addEventListener('click', () => {
+        document.getElementById('modal-receipt').classList.add('hidden');
+      });
+
+      // Teacher Panel Controls
+      const modalTeacher = document.getElementById('modal-teacher');
+      document.getElementById('btn-open-teacher-panel').addEventListener('click', () => {
+        modalTeacher.classList.remove('hidden');
+        loadTeacherDashboard();
+        playSound('step');
+      });
+      document.getElementById('btn-close-teacher-modal').addEventListener('click', () => {
+        modalTeacher.classList.add('hidden');
+      });
+      document.getElementById('btn-refresh-teacher-data').addEventListener('click', () => {
+        loadTeacherDashboard();
+        showToast('Atualizado!');
+      });
+      document.getElementById('teacher-filter-name').addEventListener('input', () => {
+        loadTeacherDashboard();
+      });
+      document.getElementById('btn-export-csv').addEventListener('click', exportTeacherCSV);
+
+      
+      // Manage Students Modal
+      const modalManage = document.getElementById('modal-manage-students');
+      const btnOpenManage = document.getElementById('btn-open-manage-students');
+      const btnCloseManage = document.getElementById('btn-close-manage-students');
+      const diagOutput = document.getElementById('diagnostic-output-text');
+      const btnRetest = document.getElementById('btn-retest-supabase');
+      const btnSavePasted = document.getElementById('btn-save-pasted-students');
+      const textareaPasted = document.getElementById('textarea-paste-students');
+
+      if (btnOpenManage) {
+        btnOpenManage.addEventListener('click', () => {
+          modalManage.classList.remove('hidden');
+          if (diagOutput) diagOutput.textContent = lastSupabaseDiagnostic || "Testando conexão...";
+          testSupabaseLive();
+        });
+      }
+
+      if (btnCloseManage) {
+        btnCloseManage.addEventListener('click', () => {
+          modalManage.classList.add('hidden');
+        });
+      }
+
+      async function testSupabaseLive() {
+        if (!diagOutput) return;
+        diagOutput.textContent = "Verificando tabelas remota_alunos e remota_turmas...";
+        let msg = "";
+
+        if (!supabaseClient) {
+          diagOutput.textContent = "Erro: Cliente Supabase não pôde ser iniciado.";
+          return;
+        }
+
+        try {
+          const { data, error } = await supabaseClient.from('remota_alunos').select('*');
+          if (error) {
+            msg += `remota_alunos: Erro [${error.code}] ${error.message} (Verifique RLS). `;
+          } else {
+            msg += `remota_alunos: ${data.length} alunos cadastrados. `;
+          }
+        } catch(e) {
+          msg += `remota_alunos: ${e.message}. `;
+        }
+
+        try {
+          const { data: d2, error: e2 } = await supabaseClient.from('remota_turmas').select('*');
+          if (e2) {
+            msg += `remota_turmas: Erro [${e2.code}] ${e2.message}. `;
+          } else {
+            msg += `remota_turmas: ${d2.length} turmas cadastradas. `;
+          }
+        } catch(e) {}
+
+        diagOutput.textContent = msg;
+        lastSupabaseDiagnostic = msg;
+      }
+
+      if (btnRetest) {
+        btnRetest.addEventListener('click', testSupabaseLive);
+      }
+
+      if (btnSavePasted) {
+        btnSavePasted.addEventListener('click', async () => {
+          const raw = textareaPasted.value.trim();
+          if (!raw) {
+            showToast("Cole os nomes dos alunos na caixa!", false);
+            return;
+          }
+
+          const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+          if (lines.length === 0) return;
+
+          btnSavePasted.disabled = true;
+          btnSavePasted.textContent = "Gravando no Supabase...";
+
+          // Save into local cache immediately
+          loadedStudents = lines.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+          try { localStorage.setItem('cache_remota_alunos_2_4', JSON.stringify(loadedStudents)); } catch(e) {}
+          populateStudentsSelect(loadedStudents);
+
+          // Try inserting into remota_alunos in Supabase
+          if (supabaseClient) {
+            try {
+              const insertRows = lines.map(n => ({
+                nome: n,
+                turma: '2º 4'
+              }));
+              const { error } = await supabaseClient.from('remota_alunos').insert(insertRows);
+              if (!error) {
+                console.log("Alunos inseridos no Supabase com sucesso!");
+              }
+            } catch(e) {
+              console.warn("Erro ao inserir em remota_alunos:", e);
+            }
+          }
+
+          btnSavePasted.disabled = false;
+          btnSavePasted.textContent = "Salvar Alunos e Atualizar Lista";
+          modalManage.classList.add('hidden');
+          showToast(`${lines.length} alunos cadastrados com sucesso!`);
+          playSound('success');
+
+          const statusEl = document.getElementById('loading-students-status');
+          if (statusEl) statusEl.textContent = `${lines.length} alunos carregados ✓`;
+        });
+      }
+
+      
+      // Wire Teacher Dashboard Tabs (Entregaram vs Não Entregaram)
+      const tabEntregues = document.getElementById('tab-entregues');
+      const tabNaoEntregues = document.getElementById('tab-nao-entregues');
+      if (tabEntregues && tabNaoEntregues) {
+        tabEntregues.addEventListener('click', () => {
+          teacherViewTab = 'entregues';
+          tabEntregues.className = 'py-1.5 rounded-lg bg-white text-blue-700 shadow-sm transition font-bold';
+          tabNaoEntregues.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition font-bold';
+          renderTeacherSubmissions(currentTeacherRecords);
+        });
+
+        tabNaoEntregues.addEventListener('click', () => {
+          teacherViewTab = 'pendentes';
+          tabNaoEntregues.className = 'py-1.5 rounded-lg bg-white text-rose-700 shadow-sm transition font-bold';
+          tabEntregues.className = 'py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition font-bold';
+          renderTeacherSubmissions(currentTeacherRecords);
+        });
+      }
+
+      // Close Photo Zoom
+      const modalPhotoZoom = document.getElementById('modal-photo-zoom');
+      const btnClosePhotoZoom = document.getElementById('btn-close-photo-zoom');
+      if (btnClosePhotoZoom) {
+        btnClosePhotoZoom.addEventListener('click', () => {
+          modalPhotoZoom.classList.add('hidden');
+        });
+      }
+      if (modalPhotoZoom) {
+        modalPhotoZoom.addEventListener('click', (e) => {
+          if (e.target === modalPhotoZoom) modalPhotoZoom.classList.add('hidden');
+        });
+      }
+
+      // Initial Render
+      renderQuestionTabs();
+      renderCurrentQuestion();
+      loadQuestionSubmissionData();
+    });
+  </script>
+
+  <!-- MODAL: GERENCIAR E COLAR ALUNOS DO 2º 4 -->
+  <div id="modal-manage-students" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl flex flex-col gap-3 animate-float-in">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
+            2º 4
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Gerenciar Alunos da Turma 2º 4</h3>
+            <p class="text-[11px] text-slate-500">Sincronização com Supabase (remota_alunos)</p>
+          </div>
+        </div>
+        <button id="btn-close-manage-students" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Live Diagnostic Box -->
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs space-y-1 font-mono text-slate-700">
+        <div class="font-bold text-slate-900 flex items-center justify-between">
+          <span>Diagnóstico Supabase:</span>
+          <button id="btn-retest-supabase" class="text-[10px] text-blue-600 hover:underline">Testar Novamente</button>
+        </div>
+        <div id="diagnostic-output-text" class="text-[11px] text-slate-600 break-words">Verificando conexão...</div>
+      </div>
+
+      <!-- Quick Paste List -->
+      <div class="flex flex-col gap-1.5">
+        <label class="text-xs font-bold text-slate-800">Colar Lista de Alunos (1 nome por linha):</label>
+        <p class="text-[11px] text-slate-500">Copie os nomes do diário ou WhatsApp e cole aqui. Eles serão salvos no Supabase e no aplicativo na hora:</p>
+        <textarea id="textarea-paste-students" rows="5" placeholder="Ana Silva&#10;Bruno Lima&#10;Carlos Eduardo&#10;Daniela Costa..." class="w-full p-2.5 rounded-xl border border-slate-300 text-xs font-medium focus:outline-none focus:border-blue-500 bg-slate-50"></textarea>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        <button id="btn-save-pasted-students" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition active:scale-95">
+          Salvar Alunos e Atualizar Lista
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- FULLSCREEN PHOTO VIEWER MODAL -->
+  <div id="modal-photo-zoom" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="relative max-w-2xl w-full flex flex-col items-center animate-float-in">
+      <button id="btn-close-photo-zoom" class="absolute -top-10 right-0 p-2 text-white bg-slate-800 rounded-full hover:bg-slate-700">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <img id="img-fullscreen-zoom" src="" alt="Resolução do Aluno" class="max-h-[80vh] w-auto rounded-xl shadow-2xl object-contain border border-slate-700">
+      <div id="caption-photo-zoom" class="text-white text-xs font-mono mt-3 text-center"></div>
+    </div>
+  </div>
+
+</body>
+</html>

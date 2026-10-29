@@ -1,0 +1,11 @@
+{
+  "name": "sistemas-3x3-turma-2t4",
+  "version": "1.0.0",
+  "description": "Aplicativo de Sistemas 3x3 Escalonados - Turma 2º 4 - Prof. Natanael",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": ["matematica", "sistemas-lineares", "supabase", "ensino-medio"],
+  "author": "Prof. Natanael",
+  "license": "MIT"
+}
