@@ -1425,13 +1425,15 @@
     }
 
     
-    // --- LOAD STUDENTS FROM SUPABASE WITH COMPREHENSIVE QUERY & DIAGNOSTICS ---
+    // --- LOAD STUDENTS EXCLUSIVELY FOR TURMA 2º 4 (EETI JACIMAR DA SILVA GAMA) ---
+    const TURMA_2T4_ID = 'a64a2125-7950-441e-a26e-d05bd98827f0';
+
     const DEFAULT_STUDENTS_2T4 = [
       "Emanuel Nunes",
       "Emanuelly Melo",
       "Leonardo Lima",
       "Maria Eduarda",
-      "Maria Luisa",
+      "Maria Luisa *",
       "Micaela Dos Santos",
       "Nicolas Carvalho",
       "Pedro Henrique",
@@ -1448,99 +1450,69 @@
       "Victor Braiam",
       "Vitor Eduardo",
       "Vitoria Julia",
-      "Yasmin Giovana",
-      "Yellen Biatriz"
+      "Yasmin Giovana *",
+      "Yellen Biatriz",
+      "Professor Natanael"
     ];
 
+    // Clear legacy corrupted cache if it had all 200+ students from other grades
     let loadedStudents = [...DEFAULT_STUDENTS_2T4];
     try {
       const cached = JSON.parse(localStorage.getItem('cache_remota_alunos_2_4') || '[]');
-      if (cached && cached.length > 0) loadedStudents = cached;
+      if (cached && cached.length > 0 && cached.length <= 30) {
+        loadedStudents = cached;
+      } else {
+        localStorage.removeItem('cache_remota_alunos_2_4');
+      }
     } catch(e) {}
 
     let lastSupabaseDiagnostic = "";
 
-    function isTurma2T4(turmaStr) {
-      if (!turmaStr) return true;
-      const s = turmaStr.toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-      return s === '24' || s.includes('24') || s.includes('2t4') || (s.includes('2') && s.includes('4'));
-    }
-
-    const TURMA_2T4_ID = 'a64a2125-7950-441e-a26e-d05bd98827f0';
-
     async function fetchStudentsFromSupabase() {
       const statusEl = document.getElementById('loading-students-status');
       const selectEl = document.getElementById('select-student-name');
-      if (statusEl) statusEl.textContent = "Sincronizando Supabase...";
+      if (statusEl) statusEl.textContent = "Sincronizando 2º 4...";
 
       let names = [];
-      let diagLogs = [];
 
       if (supabaseClient) {
-        // 1. Query remota_alunos specifically for 2º T4 turma_id
         try {
+          // Query remota_alunos STRICTLY for turma 2º T4
           const { data, error } = await supabaseClient
             .from('remota_alunos')
-            .select('nome, ordem_lista, ativo, aba_origem, turma_id')
+            .select('nome, ordem_lista, ativo')
             .eq('turma_id', TURMA_2T4_ID)
             .order('ordem_lista', { ascending: true });
 
           if (!error && data && data.length > 0) {
-            diagLogs.push(`remota_alunos (turma_id): ${data.length} alunos`);
-            data.forEach(item => {
-              if (item.nome && typeof item.nome === 'string') {
-                names.push(item.nome.trim());
-              }
-            });
+            names = data
+              .filter(item => item.ativo !== false && item.nome)
+              .map(item => item.nome.trim());
+
+            lastSupabaseDiagnostic = `remota_alunos: ${names.length} alunos da Turma 2º 4 carregados com sucesso.`;
           } else {
-            // Fallback query all
-            const resAll = await supabaseClient.from('remota_alunos').select('*');
-            if (resAll.data && resAll.data.length > 0) {
-              resAll.data.forEach(item => {
-                const origin = (item.aba_origem || item.turma || item.turma_nome || '').toString().toLowerCase();
-                if (item.turma_id === TURMA_2T4_ID || origin.includes('2º 4') || origin.includes('2º t4') || origin.includes('2-4')) {
-                  const n = item.nome || item.aluno_nome || item.nome_original;
-                  if (n) names.push(n.trim());
-                }
-              });
-            }
+            console.warn("Erro ao buscar alunos do 2º 4:", error);
+            lastSupabaseDiagnostic = error ? `Erro: ${error.message}` : "Sem dados";
           }
         } catch(e) {
-          diagLogs.push(`remota_alunos catch: ${e.message}`);
+          console.warn("Exceção remota_alunos:", e);
+          lastSupabaseDiagnostic = e.message;
         }
-
-        // Query entregas_sistemas_2t4 fallback names
-        const tableCandidates = ['entregas_sistemas_2t4', 'atividade_sistema_3x3_2t4', 'atividade_sistema_3×3_2t4'];
-        for (const tbl of tableCandidates) {
-          try {
-            const res2 = await supabaseClient.from(tbl).select('*');
-            if (res2.error) {
-              diagLogs.push(`${tbl}: Erro ${res2.error.message}`);
-            } else if (res2.data && res2.data.length > 0) {
-              diagLogs.push(`${tbl}: ${res2.data.length} registros encontrados`);
-              res2.data.forEach(item => {
-                const n = item.nome || item.aluno_nome || item.aluno;
-                if (n && typeof n === 'string') names.push(n.trim());
-              });
-            }
-          } catch(e) {}
-        }
-      } else {
-        diagLogs.push("Supabase Client não inicializado");
       }
 
-      lastSupabaseDiagnostic = diagLogs.join(" | ");
-      console.log("Supabase Diagnostic:", lastSupabaseDiagnostic);
-
-      // Merge with default official list so all students are always available
-      const merged = Array.from(new Set([...DEFAULT_STUDENTS_2T4, ...names])).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      loadedStudents = merged;
-      try { localStorage.setItem('cache_remota_alunos_2_4', JSON.stringify(merged)); } catch(e) {}
-
+      // If Supabase returned the exact 2º 4 students, use them; otherwise use default official 2º 4 list
       if (names.length > 0) {
-        if (statusEl) statusEl.innerHTML = `<span class="text-emerald-700 font-bold">Supabase: ${merged.length} alunos sincronizados ✓</span>`;
+        loadedStudents = names;
       } else {
-        if (statusEl) statusEl.innerHTML = `<span class="text-blue-700 font-medium">${merged.length} alunos oficiais (2º 4) ✓</span>`;
+        loadedStudents = [...DEFAULT_STUDENTS_2T4];
+      }
+
+      try {
+        localStorage.setItem('cache_remota_alunos_2_4', JSON.stringify(loadedStudents));
+      } catch(e) {}
+
+      if (statusEl) {
+        statusEl.innerHTML = `<span class="text-emerald-700 font-bold">${loadedStudents.length} alunos (Turma 2º 4) ✓</span>`;
       }
       populateStudentsSelect(loadedStudents);
     }
@@ -1725,7 +1697,7 @@
 
       async function testSupabaseLive() {
         if (!diagOutput) return;
-        diagOutput.textContent = "Verificando tabelas remota_alunos e remota_turmas...";
+        diagOutput.textContent = "Verificando alunos da Turma 2º 4 no Supabase...";
         let msg = "";
 
         if (!supabaseClient) {
@@ -1734,22 +1706,27 @@
         }
 
         try {
-          const { data, error } = await supabaseClient.from('remota_alunos').select('*');
+          const { data, error } = await supabaseClient
+            .from('remota_alunos')
+            .select('id, nome, ordem_lista')
+            .eq('turma_id', TURMA_2T4_ID)
+            .order('ordem_lista', { ascending: true });
+
           if (error) {
-            msg += `remota_alunos: Erro [${error.code}] ${error.message} (Verifique RLS). `;
+            msg += `Turma 2º 4: Erro [${error.code}] ${error.message}. `;
           } else {
-            msg += `remota_alunos: ${data.length} alunos cadastrados. `;
+            msg += `Turma 2º 4: ${data.length} alunos oficiais vinculados no Supabase ✓. `;
           }
         } catch(e) {
-          msg += `remota_alunos: ${e.message}. `;
+          msg += `Erro ao consultar 2º 4: ${e.message}. `;
         }
 
         try {
-          const { data: d2, error: e2 } = await supabaseClient.from('remota_turmas').select('*');
+          const { data: d2, error: e2 } = await supabaseClient.from('remota_turmas').select('*').eq('id', TURMA_2T4_ID);
           if (e2) {
             msg += `remota_turmas: Erro [${e2.code}] ${e2.message}. `;
-          } else {
-            msg += `remota_turmas: ${d2.length} turmas cadastradas. `;
+          } else if (d2 && d2.length > 0) {
+            msg += `Turma cadastrada: ${d2[0].codigo} (${d2[0].etapa_ensino}). `;
           }
         } catch(e) {}
 
