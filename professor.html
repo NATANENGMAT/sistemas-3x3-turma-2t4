@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Painel do Professor - Sistemas 3x3 | Turma 2º 4</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white pb-12">
+
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-500/20">
+          2º 4
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">EETI Jacimar Gama</span>
+            <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Prof. Natanael</span>
+          </div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Painel de Entregas & Correção de Fotos</h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-refresh" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+          <svg id="icon-refresh" class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span class="hidden sm:inline">Atualizar</span>
+        </button>
+        <a href="index.html" class="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold flex items-center gap-1 transition">
+          <span>Ver Atividade</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 py-6 w-full space-y-6">
+
+    <!-- KPI STATS CARDS -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      <div class="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <span class="text-xs font-semibold text-slate-500">Total da Turma</span>
+        <div class="flex items-baseline gap-2 mt-2">
+          <span id="stat-total-students" class="text-2xl sm:text-3xl font-extrabold text-slate-900">23</span>
+          <span class="text-xs text-slate-400">alunos</span>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl border border-emerald-200 shadow-sm flex flex-col justify-between bg-emerald-50/30">
+        <span class="text-xs font-semibold text-emerald-800">Entregaram</span>
+        <div class="flex items-baseline gap-2 mt-2">
+          <span id="stat-delivered" class="text-2xl sm:text-3xl font-extrabold text-emerald-600">0</span>
+          <span class="text-xs text-emerald-600 font-bold" id="stat-percentage">0%</span>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl border border-rose-200 shadow-sm flex flex-col justify-between bg-rose-50/30">
+        <span class="text-xs font-semibold text-rose-800">Pendentes</span>
+        <div class="flex items-baseline gap-2 mt-2">
+          <span id="stat-pending" class="text-2xl sm:text-3xl font-extrabold text-rose-600">23</span>
+          <span class="text-xs text-rose-500 font-medium">faltam</span>
+        </div>
+      </div>
+
+      <div class="p-4 bg-white rounded-2xl border border-blue-200 shadow-sm flex flex-col justify-between bg-blue-50/30">
+        <span class="text-xs font-semibold text-blue-800">Fotos Recebidas</span>
+        <div class="flex items-baseline gap-2 mt-2">
+          <span id="stat-photos" class="text-2xl sm:text-3xl font-extrabold text-blue-600">0</span>
+          <span class="text-xs text-blue-500">fotos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER & TABS BAR -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <!-- Tabs -->
+      <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl w-full sm:w-auto text-xs font-bold">
+        <button id="tab-btn-delivered" class="px-4 py-2 rounded-lg bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-1.5">
+          <span>✓ Entregaram</span>
+          <span id="badge-count-delivered" class="px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 text-[10px]">0</span>
+        </button>
+        <button id="tab-btn-pending" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5">
+          <span>⏳ Pendentes</span>
+          <span id="badge-count-pending" class="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-800 text-[10px]">23</span>
+        </button>
+      </div>
+
+      <!-- Search & Export -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="relative flex-1 sm:w-64">
+          <input type="text" id="search-input" placeholder="Buscar aluno..." class="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:border-blue-500 bg-slate-50">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <button id="btn-export-csv" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span class="hidden sm:inline">Exportar CSV</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- DELIVERED VIEW -->
+    <div id="view-delivered" class="space-y-4">
+      <div id="list-delivered-cards" class="space-y-4">
+        <div class="p-8 text-center bg-white border border-slate-200 rounded-2xl text-xs text-slate-500">
+          Carregando entregas do Supabase...
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING VIEW -->
+    <div id="view-pending" class="hidden space-y-4">
+      <div class="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h3 class="text-sm font-bold text-rose-900">Alunos Pendentes da Turma 2º 4</h3>
+          <p class="text-xs text-rose-700">Estudantes que ainda não enviaram a atividade na plataforma.</p>
+        </div>
+        <button id="btn-copy-pending" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+          <span>Copiar Lista p/ WhatsApp</span>
+        </button>
+      </div>
+
+      <div id="list-pending-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FULLSCREEN PHOTO LIGHTBOX MODAL -->
+  <div id="modal-photo-zoom" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-3 hidden">
+    <div class="relative max-w-4xl w-full flex flex-col items-center">
+      <div class="w-full flex items-center justify-between pb-3 text-white">
+        <div>
+          <h4 id="zoom-title" class="text-sm sm:text-base font-bold">Resolução do Aluno</h4>
+          <p id="zoom-subtitle" class="text-xs text-slate-400 font-mono"></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-rotate-photo" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition text-xs font-semibold flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <span class="hidden sm:inline">Girar</span>
+          </button>
+          <button id="btn-close-zoom" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-auto max-h-[82vh] w-full flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 p-2">
+        <img id="img-zoom" src="" alt="Resolução ampliada" class="max-h-[78vh] w-auto object-contain rounded-lg shadow-2xl transition duration-200">
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 opacity-0 pointer-events-none px-4 py-2.5 rounded-xl bg-slate-900 text-white shadow-xl text-xs font-semibold flex items-center gap-2 transition duration-200">
+    <span id="toast-icon" class="text-emerald-400">✓</span>
+    <span id="toast-msg">Atualizado com sucesso!</span>
+  </div>
+
+  <script>
+    // --- SUPABASE CONFIGURATION ---
+    const SUPABASE_URL = "https://jzepdmolnoobgbgdavyf.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZXBkbW9sbm9vYmdiZ2RhdnlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MTAxOTcsImV4cCI6MjEwODA4NjE5N30._DZbJOiUKsh1IbUPPmxUaV2oPMOnv9d1ff9X1hhVK74";
+    const TURMA_2T4_ID = 'a64a2125-7950-441e-a26e-d05bd98827f0';
+
+    let supabaseClient = null;
+    try {
+      if (window.supabase && window.supabase.createClient) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch(e) {
+      console.warn("Supabase client init error:", e);
+    }
+
+    const DEFAULT_STUDENTS_2T4 = [
+      "Emanuel Nunes", "Emanuelly Melo", "Leonardo Lima", "Maria Eduarda",
+      "Maria Luisa *", "Micaela Dos Santos", "Nicolas Carvalho", "Pedro Henrique",
+      "Priscila Evellyn", "Rayanna Ribeiro", "Rayra Alana", "Renata Sophia",
+      "Rian De Sa Ribeiro", "Sarah Melo", "Sophia Da Silva", "Sophya Oliveira",
+      "Taicilane Pedroza", "Victor Aldenney", "Victor Braiam", "Vitor Eduardo",
+      "Vitoria Julia", "Yasmin Giovana *", "Yellen Biatriz"
+    ];
+
+    let officialStudents = [...DEFAULT_STUDENTS_2T4];
+    let submissions = [];
+    let currentTab = 'delivered'; // 'delivered' or 'pending'
+    let currentRotation = 0;
+
+    // --- TOAST HELPER ---
+    function showToast(msg, isSuccess = true) {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const text = document.getElementById('toast-msg');
+      icon.textContent = isSuccess ? '✓' : 'ℹ';
+      icon.className = isSuccess ? 'text-emerald-400 font-bold' : 'text-blue-400 font-bold';
+      text.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2500);
+    }
+
+    // --- DATA FETCHING ---
+    async function loadData() {
+      const btnRefresh = document.getElementById('btn-refresh');
+      const iconRefresh = document.getElementById('icon-refresh');
+      if (iconRefresh) iconRefresh.classList.add('animate-spin');
+
+      // 1. Fetch Students from remota_alunos
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('remota_alunos')
+            .select('nome, ordem_lista, ativo')
+            .eq('turma_id', TURMA_2T4_ID)
+            .order('ordem_lista', { ascending: true });
+
+          if (!error && data && data.length > 0) {
+            officialStudents = data
+              .filter(a => a.ativo !== false && a.nome && !a.nome.toLowerCase().includes('professor'))
+              .map(a => a.nome.trim());
+          }
+        } catch(e) {
+          console.warn("Erro ao buscar remota_alunos:", e);
+        }
+
+        // 2. Fetch Submissions from entregas_sistemas_2t4
+        try {
+          const { data: subs, error: subErr } = await supabaseClient
+            .from('entregas_sistemas_2t4')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!subErr && subs) {
+            submissions = subs;
+          }
+        } catch(e) {
+          console.warn("Erro ao buscar entregas:", e);
+        }
+      }
+
+      if (iconRefresh) iconRefresh.classList.remove('animate-spin');
+      updateDashboard();
+    }
+
+    // --- RENDER DASHBOARD ---
+    function updateDashboard() {
+      const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+
+      // Delivered names set (normalized)
+      const deliveredNamesSet = new Set(submissions.map(s => (s.nome || '').toLowerCase().trim()));
+
+      // Pending students
+      const pendingStudents = officialStudents.filter(name => !deliveredNamesSet.has(name.toLowerCase().trim()));
+
+      // Total photos count
+      let totalPhotos = 0;
+      submissions.forEach(s => {
+        totalPhotos += (s.total_fotos || 0);
+      });
+
+      // Update KPI Cards
+      document.getElementById('stat-total-students').textContent = officialStudents.length;
+      document.getElementById('stat-delivered').textContent = submissions.length;
+      document.getElementById('stat-pending').textContent = pendingStudents.length;
+      document.getElementById('stat-photos').textContent = totalPhotos;
+
+      const pct = officialStudents.length > 0 ? Math.round((submissions.length / officialStudents.length) * 100) : 0;
+      document.getElementById('stat-percentage').textContent = `${pct}% da turma`;
+
+      document.getElementById('badge-count-delivered').textContent = submissions.length;
+      document.getElementById('badge-count-pending').textContent = pendingStudents.length;
+
+      renderDeliveredList(searchVal);
+      renderPendingGrid(pendingStudents, searchVal);
+    }
+
+    // --- RENDER DELIVERED CARDS ---
+    function renderDeliveredList(filterVal) {
+      const container = document.getElementById('list-delivered-cards');
+      const filtered = submissions.filter(s => (s.nome || '').toLowerCase().includes(filterVal));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-12 text-center bg-white border border-slate-200 rounded-2xl text-slate-400 text-xs">
+            Nenhuma entrega encontrada para o filtro.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach((sub, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-blue-300 transition overflow-hidden";
+
+        const dateStr = sub.created_at ? new Date(sub.created_at).toLocaleString('pt-BR') : 'Data não informada';
+        const photoCount = sub.total_fotos || 0;
+
+        let questionsHtml = '';
+        const qData = sub.questoes_respostas || {};
+
+        for (let i = 1; i <= 6; i++) {
+          const q = qData[`q${i}`];
+          if (q) {
+            const vals = q.valores_digitados || {};
+            const gab = q.gabarito_esperado || {};
+            const isMatch = (parseInt(vals.x) === gab.x && parseInt(vals.y) === gab.y && parseInt(vals.z) === gab.z);
+            const hasPhoto = Boolean(q.foto_base64);
+
+            questionsHtml += `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between gap-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-slate-800">Questão ${i}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    isMatch ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-800 border border-amber-200'
+                  }">
+                    ${isMatch ? '✓ Valores Corretos' : 'Revisar Valores'}
+                  </span>
+                </div>
+
+                <div class="text-[11px] font-mono text-slate-600 bg-white p-2 rounded-lg border border-slate-200 space-y-0.5">
+                  <div>Aluno: <strong>x=${vals.x || '?'}, y=${vals.y || '?'}, z=${vals.z || '?'}</strong></div>
+                  <div class="text-[10px] text-slate-400">Gabarito: x=${gab.x}, y=${gab.y}, z=${gab.z}</div>
+                </div>
+
+                ${
+                  hasPhoto 
+                    ? `
+                      <div class="relative group cursor-pointer overflow-hidden rounded-xl border border-slate-300 bg-slate-900 aspect-[4/3] flex items-center justify-center" onclick="openLightbox('${q.foto_base64}', '${sub.nome} - Questão ${i}', 'x=${vals.x}, y=${vals.y}, z=${vals.z}')">
+                        <img src="${q.foto_base64}" alt="Questão ${i}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-semibold gap-1">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path></svg>
+                          Ampliar Foto
+                        </div>
+                      </div>
+                    ` 
+                    : `
+                      <div class="p-4 rounded-xl border border-dashed border-slate-300 text-center text-slate-400 text-[11px]">
+                        Sem foto anexada
+                      </div>
+                    `
+                }
+              </div>
+            `;
+          }
+        }
+
+        card.innerHTML = `
+          <div class="p-4 sm:p-5 flex flex-col gap-3">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs">
+                  ✓
+                </span>
+                <div>
+                  <h3 class="text-sm sm:text-base font-bold text-slate-900">${sub.nome}</h3>
+                  <p class="text-[11px] text-slate-500 font-mono">Entregue em: ${dateStr} • Turma 2º 4</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold ${
+                  photoCount > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600'
+                }">
+                  📷 ${photoCount} / 6 fotos
+                </span>
+                <button class="btn-toggle-details px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl transition border border-blue-200" data-target="box-${idx}">
+                  Ocultar / Ver Detalhes
+                </button>
+              </div>
+            </div>
+
+            <!-- Photos & Calculations Grid -->
+            <div id="box-${idx}" class="mt-2 pt-4 border-t border-slate-100">
+              <div class="text-xs font-bold text-slate-700 mb-3 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                Fotos do Caderno e Cálculos das 6 Questões (Clique na imagem para ampliar):
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                ${questionsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Toggle details listener
+      document.querySelectorAll('.btn-toggle-details').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.getAttribute('data-target');
+          const box = document.getElementById(targetId);
+          if (box) {
+            box.classList.toggle('hidden');
+          }
+        });
+      });
+    }
+
+    // --- RENDER PENDING STUDENTS GRID ---
+    function renderPendingGrid(pendingList, filterVal) {
+      const container = document.getElementById('list-pending-grid');
+      const filtered = pendingList.filter(name => name.toLowerCase().includes(filterVal));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full p-8 text-center bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-800 text-xs font-bold">
+            🎉 Todos os alunos da lista já entregaram a atividade!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      filtered.forEach((name, idx) => {
+        const item = document.createElement('div');
+        item.className = "p-3 bg-white border border-rose-200 rounded-xl shadow-sm flex items-center justify-between text-xs";
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-800 font-bold flex items-center justify-center text-[10px]">
+              ${idx + 1}
+            </span>
+            <span class="font-semibold text-slate-800">${name}</span>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            Pendente
+          </span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // --- LIGHTBOX ZOOM ---
+    function openLightbox(src, title, subtitle) {
+      const modal = document.getElementById('modal-photo-zoom');
+      const img = document.getElementById('img-zoom');
+      const t = document.getElementById('zoom-title');
+      const s = document.getElementById('zoom-subtitle');
+
+      currentRotation = 0;
+      img.style.transform = `rotate(0deg)`;
+      img.src = src;
+      t.textContent = title;
+      s.textContent = subtitle || '';
+      modal.classList.remove('hidden');
+    }
+
+    document.getElementById('btn-close-zoom').addEventListener('click', () => {
+      document.getElementById('modal-photo-zoom').classList.add('hidden');
+    });
+
+    document.getElementById('btn-rotate-photo').addEventListener('click', () => {
+      currentRotation = (currentRotation + 90) % 360;
+      document.getElementById('img-zoom').style.transform = `rotate(${currentRotation}deg)`;
+    });
+
+    document.getElementById('modal-photo-zoom').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal-photo-zoom')) {
+        document.getElementById('modal-photo-zoom').classList.add('hidden');
+      }
+    });
+
+    // --- COPY PENDING TO WHATSAPP ---
+    document.getElementById('btn-copy-pending').addEventListener('click', () => {
+      const deliveredNamesSet = new Set(submissions.map(s => (s.nome || '').toLowerCase().trim()));
+      const pendingList = officialStudents.filter(name => !deliveredNamesSet.has(name.toLowerCase().trim()));
+
+      if (pendingList.length === 0) {
+        showToast("Todos os alunos já entregaram!");
+        return;
+      }
+
+      let msg = `📢 *PENDÊNCIAS - ATIVIDADE DE MATEMÁTICA (TURMA 2º 4)*\n`;
+      msg += `*Professor Natanael* • Sistemas 3x3 Escalonados\n\n`;
+      msg += `Alunos que ainda *NÃO* enviaram a resolução no link:\n`;
+      pendingList.forEach((n, i) => {
+        msg += `${i + 1}. ${n}\n`;
+      });
+      msg += `\n🔗 *Link para envio:* https://natanengmat.github.io/sistemas-3x3-turma-2t4/`;
+
+      navigator.clipboard.writeText(msg).then(() => {
+        showToast("Lista copiada para o WhatsApp!");
+      }).catch(() => {
+        showToast("Não foi possível copiar automaticamente.", false);
+      });
+    });
+
+    // --- EXPORT CSV ---
+    document.getElementById('btn-export-csv').addEventListener('click', () => {
+      const rows = [["Aluno", "Turma", "Data Envio", "Total Fotos", "Status"]];
+      const deliveredSet = new Set();
+
+      submissions.forEach(s => {
+        deliveredSet.add((s.nome || '').toLowerCase().trim());
+        const d = s.created_at ? new Date(s.created_at).toLocaleString('pt-BR') : '';
+        rows.push([s.nome, "2º 4", d, s.total_fotos || 0, "Entregue"]);
+      });
+
+      officialStudents.forEach(n => {
+        if (!deliveredSet.has(n.toLowerCase().trim())) {
+          rows.push([n, "2º 4", "-", "0", "Pendente"]);
+        }
+      });
+
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF" + rows.map(r => r.map(c => `"${c}"`).join(";")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `relatorio_entregas_2t4_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("Relatório exportado em CSV!");
+    });
+
+    // --- TAB SWITCHING ---
+    const tabDelivered = document.getElementById('tab-btn-delivered');
+    const tabPending = document.getElementById('tab-btn-pending');
+    const viewDelivered = document.getElementById('view-delivered');
+    const viewPending = document.getElementById('view-pending');
+
+    tabDelivered.addEventListener('click', () => {
+      currentTab = 'delivered';
+      tabDelivered.className = "px-4 py-2 rounded-lg bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-1.5";
+      tabPending.className = "px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5";
+      viewDelivered.classList.remove('hidden');
+      viewPending.classList.add('hidden');
+    });
+
+    tabPending.addEventListener('click', () => {
+      currentTab = 'pending';
+      tabPending.className = "px-4 py-2 rounded-lg bg-white text-blue-700 shadow-sm transition flex items-center justify-center gap-1.5";
+      tabDelivered.className = "px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-1.5";
+      viewPending.classList.remove('hidden');
+      viewDelivered.classList.add('hidden');
+    });
+
+    document.getElementById('search-input').addEventListener('input', updateDashboard);
+    document.getElementById('btn-refresh').addEventListener('click', loadData);
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>
